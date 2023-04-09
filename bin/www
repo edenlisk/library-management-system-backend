@@ -3,10 +3,16 @@
 /**
  * Module dependencies.
  */
+const mongoose = require('mongoose');
 require('dotenv').config();
 const app = require('../app');
 const debug = require('debug')('library-management-system:server');
 const http = require('http');
+
+mongoose.connect(process.env.MONGO_URL, { dbName: "library-management" })
+    .then(() => console.log("database connection successful"))
+    .catch((err) => console.log(err.message));
+
 
 /**
  * Get port from environment and store in Express.

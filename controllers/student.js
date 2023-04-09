@@ -1,5 +1,4 @@
 
-exports.createLibrarian = (req, res) => {
-
+exports.getAllStudents = (req, res) => {
 
 }
