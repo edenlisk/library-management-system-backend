@@ -1,4 +1,0 @@
-
-exports.getAllStudents = (req, res) => {
-
-}

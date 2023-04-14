@@ -1,48 +1,47 @@
-const Librarian = require('../modals/librarianModal');
+const Class = require('../modals/classModal');
 
-exports.getAllLibrarians = async (req, res) => {
+exports.getAllClasses = async (req, res) => {
     try {
-        const librarians = await Librarian.find({});
+        const classes = await Class.find().populate('students');
         res
             .status(200)
             .json(
                 {
                     status: "Success",
-                    result: librarians.length,
+                    result: classes.length,
                     data: {
-                        librarians
+                        classes
                     }
                 }
             )
-    } catch (err) {
+    } catch (e) {
         res
             .status(403)
             .json(
                 {
                     status: "Failed",
-                    message: err.message
+                    message: e.message
                 }
             )
-
     }
 }
 
-exports.createLibrarian = async (req, res) => {
+exports.createClass = async (req, res) => {
     try {
-        const newLibrarian = await Librarian.create(req.body);
+        const newClass = await Class.create(req.body);
         res
             .status(201)
             .json(
                 {
                     status: "Success",
                     data: {
-                        newLibrarian
+                        newClass
                     }
                 }
             )
     } catch (e) {
         res
-            .status(500)
+            .status(403)
             .json(
                 {
                     status: "Failed",
@@ -52,69 +51,70 @@ exports.createLibrarian = async (req, res) => {
     }
 }
 
-exports.deleteLibrarian = async (req, res) => {
+exports.getClass = async (req, res) => {
     try {
-        await Librarian.findByIdAndDelete(req.params.id);
+        const selectedClass = await Class.findById(req.params.id).populate('students');
+        res
+            .status(200)
+            .json(
+                {
+                    status: "Success",
+                    data: {
+                        selectedClass
+                    }
+                }
+            )
+    } catch (e) {
+        res
+            .status(403)
+            .json(
+                {
+                    status: "Failed",
+                    message: e.message
+                }
+            )
+    }
+}
+
+exports.updateClass = async (req, res) => {
+    try {
+        const updatedClass = await Class.findById(req.params.id);
+        if (req.body.name) updatedClass.name = req.body.name;
+        if (req.body.category) updatedClass.category = req.body.category;
+        if (req.body.students) updatedClass.students = req.body.students;
+        if (req.body.academicYear) updatedClass.academicYear = req.body.academicYear;
+        await updatedClass.save();
+        res
+            .status(200)
+            .json(
+                {
+                    status: "Success",
+                    data: {
+                        updatedClass
+                    }
+                }
+            )
+    } catch (e) {
+        res
+            .status(403)
+            .json(
+                {
+                    status: "Failed",
+                    message: e.message
+                }
+            )
+    }
+}
+
+exports.deleteClass = async (req, res) => {
+    try {
+        await Class.deleteOne({ _id: req.params.id });
         res
             .status(204)
             .json(
                 {
-                    status: "Success"
-                }
-            )
-    } catch (e) {
-        res
-            .status(403)
-            .json(
-                {
-                    status: "Failed",
-                    message: e.message
-                }
-            )
-    }
-}
-
-exports.getLibrarian = async (req, res) => {
-    try {
-        const librarian = await Librarian.findById(req.params.id);
-        res
-            .status(200)
-            .json(
-                {
                     status: "Success",
-                    data: {
-                        librarian
-                    }
-                }
-            )
-    } catch (e) {
-        res
-            .status(403)
-            .json(
-                {
-                    status: "Failed",
-                    message: e.message
-                }
-            )
-    }
-}
-
-exports.updateLibrarian = async (req, res) => {
-    try {
-        const librarian = await Librarian.findById(req.params.id);
-        if (req.body.name) librarian.name = req.body.name;
-        if (req.body.email) librarian.email = req.body.email;
-        if (req.body.username) librarian.username = req.body.username;
-        if (req.body.password) librarian.password = req.body.password;
-        await librarian.save();
-        res
-            .status(200)
-            .json(
-                {
-                    status: "Success",
-                    data: {
-                        librarian
-                    }
+                    message: "Class deleted successfully"
                 }
             )
     } catch (e) {
