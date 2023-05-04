@@ -26,11 +26,11 @@
     "pdfmake": "^0.2.7",
     "pug": "^3.0.2",
     "validator": "^13.9.0",
-    "xss-clean": "^0.1.1"
+    "xss-clean": "^0.1.1",
+    "cookie-parser": "^1.4.6",
+    "http-errors": "^2.0.0"
   },
   "devDependencies": {
-    "cookie-parser": "^1.4.6",
-    "http-errors": "^2.0.0",
     "nodemon": "^2.0.22"
   }
 }
