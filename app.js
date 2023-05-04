@@ -62,7 +62,7 @@ const corsOptionsDelegate = function (req, callback) {
 app.use(hpp())
 app.use(helmet());
 app.use('/api', limiter);
-app.use('*', cors(corsOptionsDelegate));
+// app.use('*', cors(corsOptionsDelegate));
 
 /* SETUP ROUTES */
 app.use('/api/v1/librarians', libraryRouter);
