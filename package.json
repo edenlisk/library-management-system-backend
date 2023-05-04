@@ -7,13 +7,26 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.1.5",
+    "hpp": "^0.2.3",
+    "html-to-text": "^9.0.5",
     "jade": "~1.11.0",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.3",
     "morgan": "~1.9.1",
-    "validator": "^13.9.0"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.1",
+    "pdfmake": "^0.2.7",
+    "pug": "^3.0.2",
+    "validator": "^13.9.0",
+    "xss-clean": "^0.1.1"
   },
   "devDependencies": {
     "cookie-parser": "^1.4.6",

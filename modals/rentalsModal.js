@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const rentalSchema = new mongoose.Schema({
+const rentalSchema = new mongoose.Schema(
+    {
         nameOfBook: {
             type: String,
             required: [true, "Rental must have a name of the book"]
@@ -30,6 +31,10 @@ const rentalSchema = new mongoose.Schema({
         nameOfLender: {
             type: String,
             required: [true, "Please provide name of librarian"]
+        },
+        returned: {
+            type: Boolean,
+            default: false
         }
     });
 
@@ -42,9 +47,12 @@ const rentalSchema = new mongoose.Schema({
 // })
 
 rentalSchema.pre('save', async function(next) {
-    const studentsModal = require('../modals/studentsModal')
+    const studentsModal = require('../modals/studentsModal');
     if (this.isNew) {
         try {
+            // TODO 4: if student is not allowed to lend a book while he has not returned previous rentals
+            // here I need to check if there is unreturned rentals, if there is any, deny new rental
+            // if not allow new rental.
             await studentsModal.updateOne(
                 { registrationNumber: this.registrationNumber },
                 { $push: { rentals: this._id } }

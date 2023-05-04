@@ -1,130 +1,100 @@
 const LibraryController = require('../modals/librarianModal');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const multer = require('multer');
 
-exports.getAllLibrarians = async (req, res) => {
-    try {
-        const librarians = await LibraryController.find({});
-        res
-            .status(200)
-            .json(
-                {
-                    status: "Success",
-                    result: librarians.length,
-                    data: {
-                        librarians
-                    }
-                }
-            )
-    } catch (err) {
-        res
-            .status(403)
-            .json(
-                {
-                    status: "Failed",
-                    message: err.message
-                }
-            )
 
+
+exports.getAllLibrarians = catchAsync(async (req, res, next) => {
+    const librarians = await LibraryController.find();
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                result: librarians.length,
+                data: {
+                    librarians
+                }
+            }
+        )
+    ;
+})
+
+exports.deleteLibrarian = catchAsync(async (req, res, next) => {
+    await LibraryController.findByIdAndDelete(req.params.id);
+    res
+        .status(204)
+        .json(
+            {
+                status: "Success"
+            }
+        )
+    ;
+})
+
+exports.getLibrarian = catchAsync(async (req, res, next) => {
+    const librarian = await LibraryController.findById(req.params.id);
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    librarian
+                }
+            }
+        )
+    ;
+})
+
+exports.updateLibrarian = catchAsync(async (req, res, next) => {
+    const librarian = await LibraryController.findById(req.params.id);
+    if (req.body.name) librarian.name = req.body.name;
+    if (req.body.username) librarian.username = req.body.username;
+    if (req.file) librarian.profileImage = req.file.filename;
+    await librarian.save({validateModifiedOnly: true});
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    librarian
+                }
+            }
+        )
+    ;
+})
+
+
+const multerStorage = multer.diskStorage(
+    {
+        destination: function(req, file, cb) {
+            cb(null, 'public/images/profile-photos');
+        },
+        filename: function(req, file, cb) {
+            const extension = file.mimetype.split('/')[1];
+            cb(null, `user-${req.params.id}-${new Date().getTime().toString()}.${extension}`);
+        }
+    }
+)
+
+const multerFilter = (req, file, cb) => {
+    if (!file.mimetype.split('/')[0].startsWith('image')) {
+        cb(new AppError("Not an image. Upload only images", 400), false);
+    } else {
+        cb(null, true);
     }
 }
 
-exports.createLibrarian = async (req, res) => {
-    try {
-        const newLibrarian = await LibraryController.create(req.body);
-        res
-            .status(201)
-            .json(
-                {
-                    status: "Success",
-                    data: {
-                        newLibrarian
-                    }
-                }
-            )
-    } catch (e) {
-        res
-            .status(500)
-            .json(
-                {
-                    status: "Failed",
-                    message: e.message
-                }
-            )
+const upload = multer(
+    {
+        storage: multerStorage,
+        fileFilter: multerFilter
     }
-}
+)
 
-exports.deleteLibrarian = async (req, res) => {
-    try {
-        await LibraryController.findByIdAndDelete(req.params.id);
-        res
-            .status(204)
-            .json(
-                {
-                    status: "Success"
-                }
-            )
-    } catch (e) {
-        res
-            .status(403)
-            .json(
-                {
-                    status: "Failed",
-                    message: e.message
-                }
-            )
-    }
-}
 
-exports.getLibrarian = async (req, res) => {
-    try {
-        const librarian = await LibraryController.findById(req.params.id);
-        res
-            .status(200)
-            .json(
-                {
-                    status: "Success",
-                    data: {
-                        librarian
-                    }
-                }
-            )
-    } catch (e) {
-        res
-            .status(403)
-            .json(
-                {
-                    status: "Failed",
-                    message: e.message
-                }
-            )
-    }
-}
+exports.uploadProfilePhoto = upload.single('photo');
 
-exports.updateLibrarian = async (req, res) => {
-    try {
-        const librarian = await LibraryController.findById(req.params.id);
-        if (req.body.name) librarian.name = req.body.name;
-        if (req.body.email) librarian.email = req.body.email;
-        if (req.body.username) librarian.username = req.body.username;
-        if (req.body.password) librarian.password = req.body.password;
-        await librarian.save();
-        res
-            .status(200)
-            .json(
-                {
-                    status: "Success",
-                    data: {
-                        librarian
-                    }
-                }
-            )
-    } catch (e) {
-        res
-            .status(403)
-            .json(
-                {
-                    status: "Failed",
-                    message: e.message
-                }
-            )
-    }
-}
