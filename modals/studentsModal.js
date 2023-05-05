@@ -8,7 +8,7 @@ const studentSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Student must have a name']
         },
-        class: {
+        classId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Class',
         },
@@ -33,6 +33,21 @@ const studentSchema = new mongoose.Schema(
     },
     { timestamps: true }
 )
+
+
+const Schema = mongoose.Schema;
+
+const schoolYearSchema = new Schema({
+    name: { type: String, required: true, unique: true },
+    classes: [{
+        name: { type: String, required: true },
+        students: [{
+            name: { type: String, required: true },
+            rentals: [{ type: Schema.Types.ObjectId, ref: 'Rental' }]
+        }]
+    }]
+});
+
 
 studentSchema.pre('deleteOne', async function(next) {
     try {

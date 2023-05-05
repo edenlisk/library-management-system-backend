@@ -69,6 +69,7 @@ exports.getAllStudents = catchAsync(async (req, res, next) => {
 
 exports.getStudent = catchAsync(async (req, res, next) => {
     const student = await Student.findById(req.params.id);
+    // const student = await Student.find({classId: req.params.id});
     res
         .status(200)
         .json(
@@ -85,10 +86,10 @@ exports.getStudent = catchAsync(async (req, res, next) => {
 exports.updateStudent = catchAsync(async (req, res, next) => {
     const updatedStudent = await Student.findById(req.params.id);
     if (req.body.name) updatedStudent.name = req.body.name;
-    if (req.body.className) updatedStudent.className = req.body.className;
+    // if (req.body.className) updatedStudent.className = req.body.className;
     // if (req.body.rentals) updatedStudent.rentals = req.body.rentals;
-    if (req.body.registrationNumber) updatedStudent.registrationNumber = req.body.registrationNumber;
-    if (req.body.fine) updatedStudent.fine = req.body.fine;
+    // if (req.body.registrationNumber) updatedStudent.registrationNumber = req.body.registrationNumber;
+    if (req.body.fine) updatedStudent.fine += req.body.fine;
     await updatedStudent.save();
     // TODO 2: CREATE `post` middleware to update class when student is created, DELETED or updated.
     res
@@ -117,7 +118,14 @@ exports.deleteStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.createStudent = catchAsync(async (req, res, next) => {
-    const newStudent = new Student(req.body);
+    const newStudent = await Student.create(
+        {
+            name: req.body.name,
+            classId: req.body.classId,
+            className: req.body.className,
+            registrationNumber: req.body.registrationNumber
+        }
+    );
     await newStudent.save();
     res
         .status(201)
@@ -126,6 +134,21 @@ exports.createStudent = catchAsync(async (req, res, next) => {
                 status: "Success",
                 data: {
                     newStudent
+                }
+            }
+        )
+    ;
+})
+
+exports.getStudentsForClass = catchAsync(async (req, res, next) => {
+    const students = await Student.find({classId: req.params.id});
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    students
                 }
             }
         )

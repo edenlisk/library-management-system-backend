@@ -31,6 +31,8 @@ const fonts = {
     }
 };
 
+// TODO 6: create class GenerateReport and create methods to generate specific report -> takes in ID
+
 exports.generateClassReport = catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const targetClass = await Class.findById(id);
@@ -74,7 +76,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
     const docDefinition = {
         pageOrientation: 'landscape',
         content: [
-            {text: `Rentals History for ${className} in ${academicYear}`, alignment: 'center'},
+            {text: `Library History for ${className} in ${academicYear}`, alignment: 'center'},
             {
                 table: {
                     width: ['auto', 'auto', 400, "auto"],
@@ -91,10 +93,10 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
 
 
 
-    var printer = new PdfPrinter(fonts);
+    const printer = new PdfPrinter(fonts);
 
     // SAVE THE DOCUMENT ON THE FILE SYSTEM
-    var pdfDoc = printer.createPdfKitDocument(docDefinition);
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
     // pdfDoc.pipe(fs.createWriteStream('document.pdf'));
     // pdfDoc.end();
 

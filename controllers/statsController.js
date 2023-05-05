@@ -30,15 +30,15 @@ exports.numStudentsPerClass = catchAsync(async (req, res, next) => {
                 as: "newStudents"
             }
         },
-        // {
-        //     $project: {
-        //         _id: 1,
-        //         name: 1,
-        //         category: 1,
-        //         academicYear: 1,
-        //         numberOfStudents: { $size: "$students" }
-        //     }
-        // },
+        {
+            $project: {
+                _id: 1,
+                name: 1,
+                category: 1,
+                academicYear: 1,
+                numberOfStudents: { $size: "$students" }
+            }
+        },
         // {
         //     $group: {
         //         _id: "$_id",
