@@ -1,5 +1,6 @@
 const Class = require('../modals/classModal');
 const Student = require('../modals/studentsModal');
+const Rental = require('../modals/rentalsModal');
 const catchAsync = require('../utils/catchAsync');
 
 
@@ -92,6 +93,58 @@ exports.numRentalsPerStudent = catchAsync(async (req, res, next) => {
                 status: "Success",
                 data: {
                     numRentals
+                }
+            }
+        )
+    ;
+})
+
+exports.lastCreatedRentals = catchAsync(async (req, res, next) => {
+    const rentals = await Rental.find().sort('-CreatedAt').limit(10);
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    rentals
+                }
+            }
+        )
+    ;
+})
+
+exports.topStudents = catchAsync(async (req, res, next) => {
+    let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
+    const result = [];
+    students = students.slice(0,10);
+    students.forEach(student => {
+        student.rentals.forEach((rent, index) => {
+            if (rent.academicYear === req.params.academicYear) {
+                const { _id, name, registrationNumber, fine } = student;
+                const stu = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
+                result.push(stu);
+            }else {
+                student.rentals.splice(index, 1);
+            }
+        })
+    })
+    result.sort((a, b) => {
+        if (a.numberOfRentals < b.numberOfRentals) {
+            return -1
+        } else if (a.numberOfRentals > b.numberOfRentals) {
+            return 1
+        } else {
+            return 0
+        }
+    })
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    result
                 }
             }
         )

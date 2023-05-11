@@ -1,4 +1,5 @@
 const Rental = require('../modals/rentalsModal');
+const Student = require('../modals/studentsModal');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 
@@ -25,11 +26,18 @@ exports.getAllRentals = catchAsync(async (req, res, next) => {
 })
 
 exports.createRental = catchAsync(async (req, res, next) => {
-    // const targetStudent = await Student.findById(req.body.studentRegistrationNumber);
-    const newRental = new Rental(req.body);
+    const newRental = new Rental(
+        {
+            nameOfBook: req.body.nameOfBook,
+            studentId: req.params.studentId,
+            bookId: req.body.bookId,
+            issueDate: req.body.issueDate,
+            dueDate: req.body.dueDate,
+            nameOfLender: req.body.nameOfBook,
+            academicYear: req.params.academicYear
+        }
+    );
     await newRental.save();
-    // targetStudent.rentals.push(newRental._id);
-    // await targetStudent.save();
     res
         .status(200)
         .json(
@@ -43,7 +51,7 @@ exports.createRental = catchAsync(async (req, res, next) => {
 })
 
 exports.getRental = catchAsync(async (req, res, next) => {
-    const rental = await Rental.findById(req.params.id);
+    const rental = await Rental.findById(req.params.rentalId);
     res
         .status(200)
         .json(
@@ -58,15 +66,13 @@ exports.getRental = catchAsync(async (req, res, next) => {
 })
 
 exports.updateRental = catchAsync(async (req, res, next) => {
-    const updatedRental = await Rental.findById(req.params.id);
+    const updatedRental = await Rental.findById(req.params.rentalId);
     if (req.body.nameOfBook) updatedRental.nameOfBook = req.body.nameOfBook;
-    // if (req.body.RegistrationNumber) updatedRental.RegistrationNumber = req.body.RegistrationNumber;
     if (req.body.bookId) updatedRental.bookId = req.body.bookId;
-    if (req.body.author) updatedRental.author = req.body.author;
-    if (req.body.issueDate) updatedRental.issueDate = req.body.issueDate;
+    // if (req.body.author) updatedRental.author = req.body.author;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
     if (req.body.nameOfLender) updatedRental.nameOfLender = req.body.nameOfLender;
-    await updatedRental.save();
+    await updatedRental.save({validateModifiedOnly: true});
     res
         .status(200)
         .json(
@@ -77,10 +83,11 @@ exports.updateRental = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.deleteRental = catchAsync(async (req, res, next) => {
-    await Rental.deleteOne({ _id: req.params.id });
+    await Rental.deleteOne({ _id: req.params.rentalId });
     res
         .status(204)
         .json(
@@ -89,7 +96,32 @@ exports.deleteRental = catchAsync(async (req, res, next) => {
             }
         )
     ;
-    // TODO 3: UPDATE STUDENT WHEN RENTAL IS CREATED, UPDATED OR DELETED
 })
 
-
+exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
+    const studentRentals = await Student.findOne({_id: req.params.studentId}).populate(
+        {
+            path: 'rentals',
+            populate: {
+                path: 'rentalHistory',
+                model: 'Rental'
+            }
+        }
+    );
+    studentRentals.rentals.forEach((rent, index) => {
+        if (rent.academicYear !== req.params.academicYear){
+            studentRentals.rentals.splice(index, 1);
+        }
+    })
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    rentals: studentRentals.rentals
+                }
+            }
+        )
+    ;
+})

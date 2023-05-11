@@ -22,7 +22,7 @@ exports.getAllLibrarians = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteLibrarian = catchAsync(async (req, res, next) => {
-    await LibraryController.findByIdAndDelete(req.params.id);
+    await LibraryController.findByIdAndDelete(req.params.librarianId);
     res
         .status(204)
         .json(
@@ -34,7 +34,7 @@ exports.deleteLibrarian = catchAsync(async (req, res, next) => {
 })
 
 exports.getLibrarian = catchAsync(async (req, res, next) => {
-    const librarian = await LibraryController.findById(req.params.id);
+    const librarian = await LibraryController.findById(req.params.librarianId);
     res
         .status(200)
         .json(
@@ -49,8 +49,9 @@ exports.getLibrarian = catchAsync(async (req, res, next) => {
 })
 
 exports.updateLibrarian = catchAsync(async (req, res, next) => {
-    const librarian = await LibraryController.findById(req.params.id);
+    const librarian = await LibraryController.findById(req.params.librarianId);
     if (req.body.name) librarian.name = req.body.name;
+    if (req.body.role) librarian.role = req.body.role;
     if (req.body.username) librarian.username = req.body.username;
     if (req.file) librarian.profileImage = req.file.filename;
     await librarian.save({validateModifiedOnly: true});

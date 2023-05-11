@@ -23,7 +23,7 @@ router.route('/forgotPassword')
 router.route('/resetPassword/:token')
     .patch(resetPassword)
 
-router.route('/:id')
+router.route('/:librarianId')
     .get(getLibrarian)
     .patch(uploadProfilePhoto, updateLibrarian)
     .delete( deleteLibrarian)
