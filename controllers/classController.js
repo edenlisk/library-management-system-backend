@@ -94,22 +94,42 @@ exports.deleteClass = catchAsync(async (req, res, next) => {
 });
 
 exports.getClassesByAcademicYear = catchAsync(async (req, res, next) => {
+    // const classes = await Class.aggregate(
+    //     [
+    //         {
+    //             $match: {academicYear: req.params.academicYear}
+    //         },
+    //         {
+    //             $project: {
+    //                 _id: 1,
+    //                 name: 1,
+    //                 category: 1,
+    //                 academicYear: 1,
+    //                 numberOfStudents: { $size: "$students" }
+    //             }
+    //         }
+    //     ]
+    // )
+
     const classes = await Class.aggregate(
         [
             {
                 $match: {academicYear: req.params.academicYear}
             },
             {
+                $addFields: {
+                    numberOfStudents: {$size: '$students'}
+                }
+            },
+            {
                 $project: {
-                    _id: 1,
-                    name: 1,
-                    category: 1,
-                    academicYear: 1,
-                    numberOfStudents: { $size: "$students" }
+                    students: 0,
+                    nameAcademicYear: 0
                 }
             }
         ]
     )
+    // const classes = await Class.find({academicYear: req.params.academicYear}).projection({numberOfStudents: {$size: 'students'}})
     res
         .status(200)
         .json(
