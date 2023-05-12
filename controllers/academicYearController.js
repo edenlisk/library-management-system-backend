@@ -54,14 +54,32 @@ exports.getAcademicYear = catchAsync(async (req, res, next) => {
 })
 
 exports.getAcademicYears = catchAsync(async (req, res, next) => {
-    const schoolYear = await academicYear.find().populate('classes');
+    const schoolYears = await academicYear.aggregate(
+        [
+            {
+                $match: {  }
+            },
+            // {
+            //     $addFields: {
+            //         numberOfClasses: {$size: '$classes'}
+            //     }
+            // },
+            {
+                $project: {
+                    _id: 1,
+                    academicYear: 1,
+                    numberOfClasses: {$size: '$classes'}
+                }
+            }
+        ]
+    )
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    schoolYear
+                    schoolYears
                 }
             }
         )

@@ -7,7 +7,7 @@ router.route('/')
     .get(getAcademicYears)
     .post(createAcademicYear)
 
-router.route('/:id')
+router.route('/:academicYear')
     .get(getAcademicYear)
 
 

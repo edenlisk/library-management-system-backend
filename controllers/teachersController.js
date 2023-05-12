@@ -4,13 +4,33 @@ const catchAsync = require('../utils/catchAsync');
 
 
 exports.getAllTeachers = catchAsync(async (req, res, next) => {
-    const result = new APIFeatures(Teacher.find().populate('teachersRentals'), req.query)
-        .filter()
-        .sort()
-        .limitFields()
-        .paginate()
-    ;
-    const teachers = await result.mongooseQuery;
+    // const result = new APIFeatures(Teacher.find().populate('teachersRentals'), req.query)
+    //     .filter()
+    //     .sort()
+    //     .limitFields()
+    //     .paginate()
+    // ;
+    // const teachers = await result.mongooseQuery;
+
+    const teachers = await Teacher.aggregate(
+        [
+            {
+                $lookup: {
+                    from: 'teachersrentals',
+                    localField: '_id',
+                    foreignField: 'teachersId',
+                    as: 'teachersRentals'
+                }
+            },
+            {
+                $project: {
+                   numberOfRentals: { $size: '$teachersRentals' }
+                }
+            }
+        ]
+    )
+
+
     res
         .status(200)
         .json(
@@ -22,6 +42,7 @@ exports.getAllTeachers = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.createTeacher = catchAsync(async (req, res, next) => {

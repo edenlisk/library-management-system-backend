@@ -47,6 +47,7 @@ exports.createClass = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.getClass = catchAsync(async (req, res, next) => {
@@ -129,6 +130,7 @@ exports.getClassesByAcademicYear = catchAsync(async (req, res, next) => {
             }
         ]
     )
+    // if (!classes) next(new AppError(`${req.params.academicYear} does not exists`, 400))
     // const classes = await Class.find({academicYear: req.params.academicYear}).projection({numberOfStudents: {$size: 'students'}})
     res
         .status(200)
@@ -152,8 +154,9 @@ exports.importClasses = catchAsync(async (req, res, next) => {
         const classes = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!classes) next(new AppError("No classes found in this file", 401));
         const newClasses = await Class.insertMany(classes, {ordered: false});
+        // || cls.academicYear === schoolYear.academicYear
         newClasses.forEach((cls, index) => {
-            if (schoolYear.classes.includes(cls) || cls.academicYear === schoolYear.academicYear) {
+            if (schoolYear.classes.includes(cls._id)) {
                 newClasses.splice(index, 1);
             }
             schoolYear.classes.push(cls._id);
@@ -182,7 +185,7 @@ const multerStorage = multer.diskStorage(
         },
         filename: function(req, file, cb) {
             const extension = file.mimetype.split('/')[1];
-            cb(null, `classes-${req.params.academicYear}-${new Date.now().toString()}.${extension}`);
+            cb(null, `classes-${req.params.academicYear}-${new Date().getTime().toString()}.${extension}`);
         }
     }
 )

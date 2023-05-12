@@ -12,10 +12,12 @@ const teacherSchema = new mongoose.Schema(
             required: [true, "Teacher must have registration number"],
             immutable: true
         },
-        rentals: {
-            type: [mongoose.Schema.Types.ObjectId],
-            ref: 'TeachersRental'
-        }
+        rentals: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'TeachersRental'
+            }
+        ]
     }
 )
 

@@ -22,7 +22,13 @@ const classSchema = new mongoose.Schema(
         },
         academicYear: {
             type: String,
-            required: true
+            required: true,
+            validate: {
+                validator: (elem) => {
+                    return /^\d{4}-\d{4}$/.test(elem);
+                },
+                message: 'Invalid academic year'
+            }
         },
         nameAcademicYear: {
             type: String,
@@ -43,7 +49,7 @@ classSchema.pre('save', async function (next) {
             {$push: {classes: this._id}},
             {new: true}
         )
-        if (!targetSchoolYear) next(new AppError("Target academic Year does not exists!", 400));
+        if (!targetSchoolYear) next(new AppError(`academic Year ${this.academicYear} does not exists!`, 400));
     }
     next();
 })

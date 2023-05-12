@@ -38,6 +38,7 @@ exports.getAllStudents = catchAsync(async (req, res, next) => {
 
 exports.getStudent = catchAsync(async (req, res, next) => {
     const student = await Student.findById(req.params.studentId).select("+rentals");
+    if (!student) next(new AppError("Student no longer exists!", 400));
     res
         .status(200)
         .json(
@@ -89,13 +90,16 @@ exports.deleteStudent = catchAsync(async (req, res, next) => {
 exports.createStudent = catchAsync(async (req, res, next) => {
     const student = await Student.findOne({registrationNumber: req.body.registrationNumber});
     const targetClass = await Class.findOne({_id: req.params.classId, academicYear: req.params.academicYear});
+    const checkExisting = (data) => {
+        return data.some(obj => obj.academicYear === targetClass.academicYear)
+    }
     if (student) {
         if (!targetClass) {
-            next(new AppError("Class does not exists!", 400));
+            next(new AppError(`Class you're trying to insert student does not exists`, 400));
         } else {
             // student.classIds.some(obj => obj.academicYear === targetClass.academicYear) ||
-            if (targetClass.students.includes(student._id)) {
-                next(new AppError("Student is already in this class", 400));
+            if (targetClass.students.includes(student._id) || checkExisting(student.classIds)) {
+                next(new AppError(`${student.name} is already in this class or belongs in another class`, 400));
             } else {
                 student.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
                 student.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
@@ -215,7 +219,7 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
     //     }
     // ]
     const students = await Student.find({classIds: {$elemMatch: {classId: req.params.classId}}, rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
-    console.log(students);
+    // console.log(students);
     const result = [];
     students.forEach(stu => {
         if (stu.rentals) {
@@ -243,24 +247,28 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
 
 exports.importStudents = catchAsync(async (req, res, next) => {
     const targetClass = await Class.findOne({_id: req.params.classId});
+    const checkExisting = (data) => {
+        return data.some(obj => obj.academicYear === targetClass.academicYear)
+    }
     if (!targetClass) {
         next(new AppError("Class does not exists", 401));
     } else {
         const students = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
-        if (!students) next(new AppError("No file chosen, make sure to upload correct file", 400));
+        if (!students) next(new AppError("No data found in this file", 400));
         for (let i = 0; i < students.length; i++) {
             const student = await Student.findOne({registrationNumber: students[i].registrationNumber});
             if (student) {
-            // || student.classIds.some(obj => obj.classId === targetClass._id
-                if (targetClass.students.includes(student._id)) {
-                    students.splice(i, 1);
+                if (targetClass.students.includes(student._id) || checkExisting(student.classIds)) {
+                    console.log('student is already in this class or he belongs in another class');
+                    // continue
+                    // students.splice(i, 1);
                 } else {
                     targetClass.students.push(student._id);
                     student.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
                     student.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
                     await student.save({validateModifiedOnly: true});
                     await targetClass.save({validateModifiedOnly: true});
-                    students.splice(i, 1);
+                    // students.splice(i, 1);
                 }
             } else {
                 await Student.create(
@@ -296,7 +304,7 @@ const multerStorage = multer.diskStorage(
         },
         filename: function(req, file, cb) {
             const extension = file.mimetype.split('/')[1];
-            cb(null, `students-${req.params.classId}-${new Date.now().toString()}.${extension}`);
+            cb(null, `students-${req.params.classId}-${new Date().getTime().toString()}.${extension}`);
         }
     }
 )
