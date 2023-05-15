@@ -14,6 +14,10 @@ const { numRentalsPerStudent } = require('../controllers/statsController');
 const { restrictTo, protect } = require('../controllers/authController');
 const { generateStudentReport } = require('../utils/generatePdf');
 
+router.route('/:studentId')
+    .get(getStudent)
+    .patch(updateStudent)
+
 router.route('/:academicYear')
     .get(getAllStudents)
 
@@ -30,9 +34,7 @@ router.route('/:academicYear/:classId')
     .get(getStudentsByClass)
     .post(createStudent)
 
-router.route('/:studentId')
-    .get(getStudent)
-    .patch(updateStudent)
+
 
 
 router.route('/:academicYear/:classId/:studentId')
