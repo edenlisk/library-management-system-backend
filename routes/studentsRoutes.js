@@ -24,7 +24,7 @@ router.route('/stats')
     .get(numRentalsPerStudent)
 
 router.route('/upload/:classId')
-    .post(uploadClassStudents, importStudents);
+    .post(uploadClassStudents, importStudents)
 
 router.route('/:academicYear/:classId')
     .get(getStudentsByClass)

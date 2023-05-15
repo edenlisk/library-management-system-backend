@@ -5,13 +5,20 @@
  */
 const mongoose = require('mongoose');
 require('dotenv').config();
+
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+  console.log('UNCAUGHT EXCEPTION OCCURRED', 'Shutting down ......');
+  process.exit(1);
+})
+
 const app = require('../app');
 const debug = require('debug')('library-management-system:server');
 const http = require('http');
 
 mongoose.connect(process.env.MONGO_URL, { dbName: "library-management" })
     .then(() => console.log("database connection successful"))
-    .catch((err) => console.log(err.message));
+    .catch(err => console.log(err.message));
 
 
 /**
@@ -34,6 +41,14 @@ const server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  console.log('UNHANDLED REJECTION OCCURRED', 'Shutting down ......');
+  server.close(() => {
+    process.exit(1);
+  })
+})
+
 
 /**
  * Normalize a port into a number, string, or false.

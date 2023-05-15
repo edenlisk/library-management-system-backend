@@ -88,7 +88,7 @@ exports.deleteStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.createStudent = catchAsync(async (req, res, next) => {
-    const student = await Student.findOne({registrationNumber: req.body.registrationNumber});
+    const student = await Student.findOne({$and: [{registrationNumber: req.body.registrationNumber}, {name: req.body.name}]});
     const targetClass = await Class.findOne({_id: req.params.classId, academicYear: req.params.academicYear});
     const checkExisting = (data) => {
         return data.some(obj => obj.academicYear === targetClass.academicYear)
