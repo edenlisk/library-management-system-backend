@@ -18,8 +18,8 @@ router.route('/:studentId')
     .get(getStudent)
     .patch(updateStudent)
 
-router.route('/:academicYear')
-    .get(getAllStudents)
+// router.route('/:academicYear')
+//     .get(getAllStudents)
 
 router.route('/report/:studentId')
     .get(generateStudentReport)

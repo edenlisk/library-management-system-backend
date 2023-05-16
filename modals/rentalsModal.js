@@ -23,16 +23,18 @@ const rentalSchema = new mongoose.Schema(
             type: Date,
             immutable: true,
             default: new Date(),
-            // required: [true, "Please provide issue date of rental"]
+            required: [true, "Please provide issue date of rental"]
         },
+        category: String,
         dueDate: {
             type: Date,
-            default: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            default: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            required: true
         },
-        nameOfLender: {
-            type: String,
-            required: [true, "Please provide name of librarian"]
-        },
+        // nameOfLender: {
+        //     type: String,
+        //     required: [true, "Please provide name of librarian"]
+        // },
         returned: {
             type: Boolean,
             default: false

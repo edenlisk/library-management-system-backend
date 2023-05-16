@@ -69,9 +69,10 @@ exports.updateRental = catchAsync(async (req, res, next) => {
     const updatedRental = await Rental.findById(req.params.rentalId);
     if (req.body.nameOfBook) updatedRental.nameOfBook = req.body.nameOfBook;
     if (req.body.bookId) updatedRental.bookId = req.body.bookId;
+    if (req.body.category) updatedRental.category = req.body.category;
     // if (req.body.author) updatedRental.author = req.body.author;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
-    if (req.body.nameOfLender) updatedRental.nameOfLender = req.body.nameOfLender;
+    // if (req.body.nameOfLender) updatedRental.nameOfLender = req.body.nameOfLender;
     await updatedRental.save({validateModifiedOnly: true});
     res
         .status(200)
