@@ -51,16 +51,7 @@ const studentSchema = new mongoose.Schema(
                         ref: 'Rental'
                     }
                 ],
-            }],
-            // default: () => {
-            //     return [
-            //         {
-            //             academicYear: '2022-2023',
-            //             rentalHistory: []
-            //         }
-            //     ]
-            //
-            // },
+            }]
         },
         registrationNumber: {
             type: String,

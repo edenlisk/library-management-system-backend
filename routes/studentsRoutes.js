@@ -14,14 +14,16 @@ const { numRentalsPerStudent } = require('../controllers/statsController');
 const { restrictTo, protect } = require('../controllers/authController');
 const { generateStudentReport } = require('../utils/generatePdf');
 
+
+
 router.route('/:studentId')
     .get(getStudent)
     .patch(updateStudent)
 
-// router.route('/:academicYear')
-//     .get(getAllStudents)
+router.route('/all-students/:academicYear')
+    .get(getAllStudents)
 
-router.route('/report/:studentId')
+router.route('/report/:academicYear/:studentId')
     .get(generateStudentReport)
 
 router.route('/stats')

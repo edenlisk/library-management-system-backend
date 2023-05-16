@@ -2,6 +2,7 @@ const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 exports.getAllRentals = catchAsync(async (req, res, next) => {
     const result = new APIFeatures(Rental.find(), req.query)
@@ -38,7 +39,7 @@ exports.createRental = catchAsync(async (req, res, next) => {
             academicYear: req.params.academicYear
         }
     );
-    await newRental.save();
+    await newRental.save({validateModifiedOnly: true});
     res
         .status(200)
         .json(
@@ -69,11 +70,13 @@ exports.getRental = catchAsync(async (req, res, next) => {
 
 exports.updateRental = catchAsync(async (req, res, next) => {
     const updatedRental = await Rental.findById(req.params.rentalId);
+    if (!updatedRental) return next(new AppError("This rental does not exists!", 400));
     if (req.body.nameOfBook) updatedRental.nameOfBook = req.body.nameOfBook;
     if (req.body.bookId) updatedRental.bookId = req.body.bookId;
     if (req.body.category) updatedRental.category = req.body.category;
     // if (req.body.author) updatedRental.author = req.body.author;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
+    if (req.req.returned) updatedRental.returned = req.body.returned;
     // if (req.body.nameOfLender) updatedRental.nameOfLender = req.body.nameOfLender;
     await updatedRental.save({validateModifiedOnly: true});
     res
@@ -102,7 +105,9 @@ exports.deleteRental = catchAsync(async (req, res, next) => {
 })
 
 exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
-    const studentRentals = await Student.findOne({_id: req.params.studentId}).populate(
+    const studentRentals = await Student.findOne(
+        {_id: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}}
+    ).populate(
         {
             path: 'rentals',
             populate: {
@@ -110,19 +115,20 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
                 model: 'Rental'
             }
         }
-    );
-    studentRentals.rentals.forEach((rent, index) => {
-        if (rent.academicYear !== req.params.academicYear){
-            studentRentals.rentals.splice(index, 1);
-        }
-    })
+    ).select({rentals: 1})
+    // studentRentals.rentals.forEach((rent, index) => {
+    //     if (rent.academicYear !== req.params.academicYear){
+    //         studentRentals.rentals.splice(index, 1);
+    //     }
+    // })
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    rentals: studentRentals.rentals
+                    studentRentals
+                    // rentals: studentRentals.rentals
                 }
             }
         )
