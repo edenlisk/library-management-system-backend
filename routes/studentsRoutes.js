@@ -9,12 +9,13 @@ const {
     getStudentsByClass,
     importStudents,
     uploadClassStudents } = require('../controllers/studentsController');
-const { numRentalsPerStudent } = require('../controllers/statsController');
+const { topStudents } = require('../controllers/statsController');
 // TODO: PROTECT ALL ROUTES
 const { restrictTo, protect } = require('../controllers/authController');
 const { generateStudentReport } = require('../utils/generatePdf');
 
-
+router.route('/stats/:academicYear')
+    .get(topStudents)
 
 router.route('/:studentId')
     .get(getStudent)
@@ -26,8 +27,6 @@ router.route('/all-students/:academicYear')
 router.route('/report/:academicYear/:studentId')
     .get(generateStudentReport)
 
-router.route('/stats')
-    .get(numRentalsPerStudent)
 
 router.route('/upload/:classId')
     .post(uploadClassStudents, importStudents)

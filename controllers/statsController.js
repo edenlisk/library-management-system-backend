@@ -130,9 +130,9 @@ exports.topStudents = catchAsync(async (req, res, next) => {
         })
     })
     result.sort((a, b) => {
-        if (a.numberOfRentals < b.numberOfRentals) {
+        if (a.numberOfRentals > b.numberOfRentals) {
             return -1
-        } else if (a.numberOfRentals > b.numberOfRentals) {
+        } else if (a.numberOfRentals < b.numberOfRentals) {
             return 1
         } else {
             return 0
