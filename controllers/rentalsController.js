@@ -33,7 +33,8 @@ exports.createRental = catchAsync(async (req, res, next) => {
             bookId: req.body.bookId,
             issueDate: req.body.issueDate,
             dueDate: req.body.dueDate,
-            nameOfLender: req.body.nameOfBook,
+            category: req.body.category,
+            // nameOfLender: req.body.nameOfBook,
             academicYear: req.params.academicYear
         }
     );
@@ -48,6 +49,7 @@ exports.createRental = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.getRental = catchAsync(async (req, res, next) => {
