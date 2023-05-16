@@ -136,8 +136,9 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
         [{text: "book id"}, {text: "book name"}, {text: "category"}, {text: "issue date"}, {text: "due date"}, {text: "returned"}]
     ]
     const populateDoc = (rentalsInfo, studentData) => {
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
         rentalsInfo.forEach(rental => {
-            studentData.push([{text: rental.bookId}, {text: rental.nameOfBook}, {text: rental.category}, {text: rental.issueDate}, {text: rental.dueDate}, {text: rental.returned}])
+            studentData.push([{text: rental.bookId}, {text: rental.nameOfBook}, {text: rental.category}, {text: rental.issueDate ? rental.issueDate.toLocaleDateString('en-US', options) : ''}, {text: rental.dueDate ? rental.dueDate.toLocaleDateString('en-US', options) : ''}, {text: rental.returned}])
         })
         return studentData;
     }
