@@ -115,19 +115,17 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
                 model: 'Rental'
             }
         }
-    ).select({rentals: 1})
-    // studentRentals.rentals.forEach((rent, index) => {
-    //     if (rent.academicYear !== req.params.academicYear){
-    //         studentRentals.rentals.splice(index, 1);
-    //     }
-    // })
+    ).select({rentals: 1});
+
+    const rentals = studentRentals.rentals.filter(rent => rent.academicYear === req.params.academicYear);
+    const { rentalHistory } = rentals[0];
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    rentals: studentRentals.rentals[0].rentalHistory
+                    rentalHistory
                 }
             }
         )

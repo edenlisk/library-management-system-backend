@@ -118,7 +118,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
 })
 
 exports.generateStudentReport = catchAsync(async (req, res, next) => {
-    const student = await Student.findOne(
+    let student = await Student.findOne(
         {_id: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}}
         )
         .populate(
@@ -132,6 +132,7 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
         )
     ;
     if (!student) return next(new AppError("Student no longer exists", 403));
+
     const studentData = [
         [{text: "book id"}, {text: "book name"}, {text: "category"}, {text: "issue date"}, {text: "due date"}, {text: "returned"}]
     ]
