@@ -127,8 +127,7 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
             {
                 status: "Success",
                 data: {
-                    studentRentals
-                    // rentals: studentRentals.rentals
+                    rentals: studentRentals.rentals[0].rentalHistory
                 }
             }
         )
