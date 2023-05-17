@@ -39,7 +39,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
         return next(new AppError("Class no longer exists",401));
     }
     const { _id, name:className,} = targetClass;
-    const students = await Student.find(
+    let students = await Student.find(
         {
             classIds: {$elemMatch: {classId: _id}},
             rentals: {$elemMatch: {academicYear: targetClass.academicYear}}
@@ -67,6 +67,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
     ];
     const populatedDoc = (studentsData, tableData) => {
         studentsData.forEach(student => {
+            student.rentals = student.rentals.filter(rent => rent.academicYear === targetClass.academicYear)
             tableData.push(
                 [
                     {text: student.name, alignment: 'left'},
@@ -118,7 +119,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
 })
 
 exports.generateStudentReport = catchAsync(async (req, res, next) => {
-    let student = await Student.findOne(
+    const student = await Student.findOne(
         {_id: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}}
         )
         .populate(
@@ -132,7 +133,7 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
         )
     ;
     if (!student) return next(new AppError("Student no longer exists", 403));
-
+    const rentals = student.rentals.filter(rent => rent.academicYear === req.params.academicYear);
     const studentData = [
         [{text: "book id"}, {text: "book name"}, {text: "category"}, {text: "issue date"}, {text: "due date"}, {text: "returned"}]
     ]
@@ -151,7 +152,7 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
             {
                 table: {
                     width: ['*', '*', '*', '*', '*', 'auto'],
-                    body: populateDoc(student.rentals[0].rentalHistory, studentData),
+                    body: populateDoc(rentals[0].rentalHistory, studentData),
                     alignment: 'center',
                 },
                 alignment: 'center'
