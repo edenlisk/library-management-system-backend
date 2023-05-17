@@ -274,9 +274,9 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                 await Student.create(
                     {
                         name: students[i].name,
-                        academicYear: students[i].academicYear,
-                        currentClassId: req.params.classId,
-                        rentals: [{academicYear: students[i].academicYear, rentalHistory: []}],
+                        academicYear: targetClass.academicYear,
+                        currentClassId: targetClass._id,
+                        rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}],
                         registrationNumber: students[i].registrationNumber
                     }
                 )
