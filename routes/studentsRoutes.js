@@ -25,7 +25,7 @@ router.route('/all-students/:academicYear')
     .get(getAllStudents)
 
 router.route('/report/:academicYear/:studentId')
-    .get(generateStudentReport)
+    .post(generateStudentReport)
 
 
 router.route('/upload/:classId')

@@ -19,7 +19,7 @@ router.route('/')
     .get(getAllClasses)
 
 router.route('/report/:classId')
-    .get(generateClassReport)
+    .post(generateClassReport)
 
 router.route('/stats')
     .get(numStudentsPerClass)
