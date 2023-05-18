@@ -24,7 +24,7 @@ router.route('/:studentId')
 router.route('/all-students/:academicYear')
     .get(getAllStudents)
 
-router.route('/report/:academicYear/:studentId')
+router.route('/report/:studentId')
     .post(generateStudentReport)
 
 

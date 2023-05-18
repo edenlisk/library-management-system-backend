@@ -1,5 +1,6 @@
 const PdfPrinter = require('pdfmake');
 const Class = require('../modals/classModal');
+const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
 const catchAsync = require('./catchAsync');
 const AppError = require('./appError');
@@ -63,7 +64,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
         return rentalsData;
     }
     const tableData = [
-        [{text: "student name"}, 'reg number', 'rentals', "penalty fee"]
+        [{text: "student name"}, 'reg number', 'rentals', "penalty fee (RWF)"]
     ];
     const populatedDoc = (studentsData, tableData) => {
         studentsData.forEach(student => {
@@ -89,7 +90,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
         pageOrientation: 'landscape',
         pageMargins: [90, 40, 50, 50],
         content: [
-            {text: `Library History for ${className} in ${targetClass.academicYear}`, alignment: 'left'},
+            {text: `Library History for ${className} in ${targetClass.academicYear}`, alignment: 'left', margin: [30, 20, 30, 20], fontSize: 25},
             {
                 table: {
                     width: ['100', 'auto', '500', '*'],
@@ -119,21 +120,9 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
 })
 
 exports.generateStudentReport = catchAsync(async (req, res, next) => {
-    const student = await Student.findOne(
-        {_id: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}}
-        )
-        .populate(
-            {
-                path: 'rentals',
-                populate: {
-                    path: 'rentalHistory',
-                    model: 'Rental'
-                }
-            }
-        )
-    ;
+    const student = await Student.findOne({_id: req.params.studentId});
+    const studentRentals = await Rental.find({studentId: req.params.studentId})
     if (!student) return next(new AppError("Student no longer exists", 403));
-    const rentals = student.rentals.filter(rent => rent.academicYear === req.params.academicYear);
     const studentData = [
         [{text: "book id"}, {text: "book name"}, {text: "category"}, {text: "issue date"}, {text: "due date"}, {text: "returned"}]
     ]
@@ -144,19 +133,22 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
         })
         return studentData;
     }
+
+
     const docDefinition = {
         pageOrientation: 'landscape',
         pageMargins: [70, 50, 40, 50],
         content: [
-            {text: `Library History for ${student.name} (${student.registrationNumber})`, alignment: 'left'},
+            {text: `Library History for ${student.name} (${student.registrationNumber})`, alignment: 'left', margin: [30, 20, 30, 20], fontSize: 25},
             {
                 table: {
                     width: ['*', '*', '*', '*', '*', 'auto'],
-                    body: populateDoc(rentals[0].rentalHistory, studentData),
+                    body: populateDoc(studentRentals, studentData),
                     alignment: 'center',
                 },
                 alignment: 'center'
             },
+            {text: `Overall fine: ${student.fine} RWF`, margin: [70, 90, 70, 90], alignment: 'center', fontSize: 40}
         ],
         defaultStyle: {
             font: 'Helvetica',
