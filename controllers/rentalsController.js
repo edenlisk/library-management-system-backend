@@ -76,7 +76,7 @@ exports.updateRental = catchAsync(async (req, res, next) => {
     // if (req.body.category) updatedRental.category = req.body.category;
     // if (req.body.author) updatedRental.author = req.body.author;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
-    if (req.req.returned) updatedRental.returned = req.body.returned;
+    if (req.body.returned) updatedRental.returned = req.body.returned;
     // if (req.body.nameOfLender) updatedRental.nameOfLender = req.body.nameOfLender;
     await updatedRental.save({validateModifiedOnly: true});
     res
