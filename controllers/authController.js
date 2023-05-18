@@ -166,3 +166,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     currentUser.password = undefined;
     createSendToken(currentUser, 200, res);
 })
+
+exports.adminSignup = catchAsync(async (req, res, next) => {
+    req.body.role = 'super-admin';
+    next();
+})

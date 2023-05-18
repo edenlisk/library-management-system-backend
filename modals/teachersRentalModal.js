@@ -12,18 +12,16 @@ const teachersRentalSchema = new mongoose.Schema(
           required: [true, 'Please provide number of books']
         },
         issueDate: {
-            type: Date,
-            default: () => new Date()
+            type: String,
+            required: [true, 'Please provide issue date of rental']
         },
         dueDate: {
-            type: Date,
-            default: function () {
-                return new Date(this.issueDate + 7 * 24 * 60 * 60 * 1000)
-            }
+            type: String,
+            required: [true, 'Please provide due date of rental']
         },
         rentalFor: {
             type: String,
-            required: true
+            required: [true, 'Enter the render']
         },
         teacherID: {
             type: mongoose.Schema.Types.ObjectId,
@@ -43,7 +41,7 @@ teachersRentalSchema.pre('save', async function (next) {
         const teacher = await Teacher.updateOne(
             { _id: this.teacherID },
             { $push: { rentals: this._id } },
-            {new: true}
+            {new: true, runValidators: true}
         )
         if (!teacher) next(new AppError("teacher does not exists", 400));
     }

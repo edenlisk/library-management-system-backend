@@ -21,6 +21,7 @@ const rentalsRouter = require('./routes/rentalsRoutes');
 const teachersRouter = require('./routes/teachersRoutes');
 const teachersRentalRouter = require('./routes/teachersRentalRoutes');
 const academicYearRouter = require('./routes/academicYearRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 // const reportsRouter = require('./routes/reportsRoutes');
 
 const app = express();
@@ -66,6 +67,7 @@ app.use('/api', limiter);
 // app.use('*', cors(corsOptionsDelegate));
 
 /* SETUP ROUTES */
+app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/librarians', libraryRouter);
 app.use('/api/v1/students', studentsRouter);
 app.use('/api/v1/classes', classRouter);
