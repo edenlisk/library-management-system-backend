@@ -72,8 +72,8 @@ exports.updateRental = catchAsync(async (req, res, next) => {
     const updatedRental = await Rental.findById(req.params.rentalId);
     if (!updatedRental) return next(new AppError("This rental does not exists!", 400));
     if (req.body.nameOfBook) updatedRental.nameOfBook = req.body.nameOfBook;
-    if (req.body.bookId) updatedRental.bookId = req.body.bookId;
-    if (req.body.category) updatedRental.category = req.body.category;
+    // if (req.body.bookId) updatedRental.bookId = req.body.bookId;
+    // if (req.body.category) updatedRental.category = req.body.category;
     // if (req.body.author) updatedRental.author = req.body.author;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
     if (req.req.returned) updatedRental.returned = req.body.returned;

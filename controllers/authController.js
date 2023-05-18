@@ -13,7 +13,7 @@ const signToken = id => {
 const createSendToken = (user, statusCode, res) => {
     const token = signToken(user._id);
     const cookieOptions = {
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN + 24 * 60 * 60 * 1000),
         httpOnly: true
     }
     if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
@@ -58,13 +58,14 @@ exports.login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        next(new AppError("Please provide email and password", 400));
+        return next(new AppError("Please provide email and password", 400));
     }
 
     const librarian = await LibrarianModal.findOne({email: email}).select("+password");
     if (!librarian || !(await librarian.verifyPassword(password))) {
-        next(new AppError("Invalid Email or Password"), 401);
+        return next(new AppError("Invalid Email or Password"), 401);
     }
+    librarian.password = undefined;
     createSendToken(librarian, 200, res)
 })
 
