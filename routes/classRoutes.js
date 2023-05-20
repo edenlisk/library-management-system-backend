@@ -24,6 +24,11 @@ router.route('/report/:classId')
 router.route('/stats')
     .get(numStudentsPerClass)
 
+router.route('/class/:classId')
+    .get(getClass)
+    .patch(updateClass)
+    .delete(deleteClass)
+
 router.route('/:academicYear')
     .get(getClassesByAcademicYear)
     .post(createClass)
@@ -31,9 +36,5 @@ router.route('/:academicYear')
 router.route('/upload/:academicYear')
     .post(uploadAcademicYearClasses, importClasses)
 
-router.route('/:classId')
-    .get(getClass)
-    .patch(updateClass)
-    .delete(deleteClass)
 
 module.exports = router;

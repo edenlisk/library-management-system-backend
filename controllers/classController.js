@@ -51,7 +51,8 @@ exports.createClass = catchAsync(async (req, res, next) => {
 })
 
 exports.getClass = catchAsync(async (req, res, next) => {
-    const selectedClass = await Class.findById(req.params.classId).populate('students');
+    const selectedClass = await Class.findById(req.params.classId).select({students: 0, academicYear: 0});
+    if (!selectedClass) return next(new AppError("Class does not exists!", 400));
     res
         .status(200)
         .json(
@@ -62,6 +63,7 @@ exports.getClass = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.updateClass = catchAsync(async (req, res, next) => {

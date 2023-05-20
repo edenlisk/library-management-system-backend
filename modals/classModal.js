@@ -28,7 +28,8 @@ const classSchema = new mongoose.Schema(
                     return /^\d{4}-\d{4}$/.test(elem);
                 },
                 message: 'Invalid academic year'
-            }
+            },
+            immutable: true
         },
         nameAcademicYear: {
             type: String,
