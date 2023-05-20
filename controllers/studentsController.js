@@ -56,13 +56,7 @@ exports.updateStudent = catchAsync(async (req, res, next) => {
     const updatedStudent = await Student.findById(req.params.studentId);
     if (!updatedStudent) next(new AppError("Student does not exists!", 400));
     if (req.body.name) updatedStudent.name = req.body.name;
-    if (req.body.fine) {
-        if (parseInt(req.body.fine) >= parseInt(updatedStudent.fine)) {
-            updatedStudent.fine = 0;
-        } else {
-            updatedStudent.fine = parseInt(updatedStudent.fine) + parseInt(req.body.fine);
-        }
-    }
+    if (req.body.fine) updatedStudent.fine = parseInt(updatedStudent.fine) + parseInt(req.body.fine);
     await updatedStudent.save({validateModifiedOnly: true});
     // TODO 2: CREATE `post` middleware to update class when student is created, DELETED or updated.
     res
