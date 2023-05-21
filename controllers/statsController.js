@@ -150,3 +150,17 @@ exports.topStudents = catchAsync(async (req, res, next) => {
         )
     ;
 })
+
+exports.weeklyStats = catchAsync(async (req, res, next) => {
+    const currentDate = new Date(); // Get the current date
+    const currentDay = currentDate.getDay(); // Get the current day of the week (0-6, where 0 is Sunday)
+
+    // Calculate the start and end dates of the previous week
+    const startOfPreviousWeek = new Date(currentDate);
+    startOfPreviousWeek.setDate(currentDate.getDate() - currentDay - 6); // Subtract the current day and add 6 more days
+    const endOfPreviousWeek = new Date(startOfPreviousWeek);
+    endOfPreviousWeek.setDate(startOfPreviousWeek.getDate() + 6); // Add 6 days to get the end of the week
+
+    const rentals = await Rental.find()
+    console.log(rentals);
+})

@@ -117,6 +117,8 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
         }
     ).select({rentals: 1});
 
+    if (!studentRentals) return next(new AppError("Student does not exists", 400));
+
     const rentals = studentRentals.rentals.filter(rent => rent.academicYear === req.params.academicYear);
     const { rentalHistory } = rentals[0];
     res

@@ -15,24 +15,16 @@ const rentalSchema = new mongoose.Schema(
             type: String,
             required: [true, "Please provide bookId"]
         },
-        // author: {
-        //     type: String,
-        //     required: [true, "Please provide book author"]
-        // },
         issueDate: {
-            type: String,
+            type: Date,
             immutable: true,
             required: [true, "Please provide issue date of rental"]
         },
         category: String,
         dueDate: {
-            type: String,
+            type: Date,
             required: true
         },
-        // nameOfLender: {
-        //     type: String,
-        //     required: [true, "Please provide name of librarian"]
-        // },
         returned: {
             type: Boolean,
             default: false
@@ -43,13 +35,6 @@ const rentalSchema = new mongoose.Schema(
         }
     }, {timestamps: true});
 
-// rentalSchema.post('save', async function (next) {
-//     await Student.updateOne(
-//         { name: this.studentRegistrationNumber },
-//         { $push: {rentals: this._id} }
-//     );
-//     next();
-// })
 
 rentalSchema.pre('save', async function(next) {
     const studentsModal = require('../modals/studentsModal');
@@ -90,12 +75,5 @@ rentalSchema.pre('deleteOne', async function(next) {
     )
     next();
 })
-
-// rentalSchema.methods.updateStudent = async function () {
-//     await Student.updateOne(
-//         { registrationNumber: this.RegistrationNumber },
-//         { $push: { rentals: this._id } }
-//     );
-// }
 const rentalModal = mongoose.model('Rental', rentalSchema);
 module.exports = rentalModal;

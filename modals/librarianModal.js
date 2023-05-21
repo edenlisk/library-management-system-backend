@@ -81,7 +81,7 @@ librarianSchema.methods.createPasswordResetToken = async function () {
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     this.passwordResetExpires = Date.now() + 30 * 60 * 1000;
     // await this.save({validateBeforeSave: true});
-    console.log({resetToken}, this.passwordResetToken);
+    // console.log({resetToken}, this.passwordResetToken);
     return resetToken;
 }
 
