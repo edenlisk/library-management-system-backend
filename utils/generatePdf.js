@@ -129,7 +129,15 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
     const populateDoc = (rentalsInfo, studentData) => {
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
         rentalsInfo.forEach(rental => {
-            studentData.push([{text: rental.bookId}, {text: rental.nameOfBook}, {text: rental.category}, {text: rental.issueDate}, {text: rental.dueDate}, {text: rental.returned}])
+            studentData.push(
+                [
+                    {text: rental.bookId},
+                    {text: rental.nameOfBook},
+                    {text: rental.category},
+                    {text: rental.issueDate.toISOString().split('T')[0]},
+                    {text: rental.dueDate.toISOString().split('T')[0]}, {text: rental.returned}
+                ]
+            )
         })
         return studentData;
     }

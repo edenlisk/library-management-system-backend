@@ -161,6 +161,35 @@ exports.weeklyStats = catchAsync(async (req, res, next) => {
     const endOfPreviousWeek = new Date(startOfPreviousWeek);
     endOfPreviousWeek.setDate(startOfPreviousWeek.getDate() + 6); // Add 6 days to get the end of the week
 
-    const rentals = await Rental.find()
-    console.log(rentals);
+    const rawRentals = await Rental.find();
+    const rentals = rawRentals.filter(rent => rent.issueDate.toISOString().split('T')[0] >= startOfPreviousWeek.toISOString().split('T')[0])
+    const rentalsByDay = {};
+    const weekDay = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
+    for (let i = 0; i < 7; i++) {
+        const startDate = new Date(startOfPreviousWeek);
+        startDate.setDate(startOfPreviousWeek.getDate() + i);
+        const day = startDate.getDay();
+        rentalsByDay[weekDay[day]] = 0;
+    }
+    rentals.forEach(rent => {
+        const day = rent.issueDate.getDay();
+        rentalsByDay[weekDay[day]]++
+    })
+    const fullNames = {"Sun":"Sunday", "Mon":"Monday", "Tue":"Tuesday", "Wed":"Wednesday", "Thur":"Thursday", "Fri":"Friday", "Sat":"Saturday"}
+    const getFullName = (day) => {
+        return fullNames[day];
+    }
+    const rentalsByDayKeys = Object.keys(rentalsByDay);
+    const populatedDoc = (rentalsData) => {
+        rentalsData.forEach(rent => {
+            const rental = {
+                "id": fullNames[rent],
+                "color": '',
+                "data": {
+
+                }
+            }
+        })
+    }
+    console.log(rentalsByDay);
 })
