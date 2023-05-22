@@ -167,44 +167,243 @@ exports.topStudents = catchAsync(async (req, res, next) => {
 })
 
 exports.weeklyStats = catchAsync(async (req, res, next) => {
-    const currentDate = new Date(); // Get the current date
-    const currentDay = currentDate.getDay(); // Get the current day of the week (0-6, where 0 is Sunday)
+    // const currentDate = new Date(); // Get the current date
+    // const currentDay = currentDate.getDay(); // Get the current day of the week (0-6, where 0 is Sunday)
+    //
+    // // Calculate the start and end dates of the previous week
+    // const startOfPreviousWeek = new Date(currentDate);
+    // startOfPreviousWeek.setDate(currentDate.getDate() - currentDay - 6); // Subtract the current day and add 6 more days
+    // const endOfPreviousWeek = new Date(startOfPreviousWeek);
+    // endOfPreviousWeek.setDate(startOfPreviousWeek.getDate() + 6); // Add 6 days to get the end of the week
+    //
+    // const rawRentals = await Rental.find();
+    // const rentals = rawRentals.filter(rent => rent.issueDate.toISOString().split('T')[0] >= startOfPreviousWeek.toISOString().split('T')[0])
+    // const rentalsByDay = {};
+    // const weekDay = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
+    // for (let i = 0; i < 7; i++) {
+    //     const startDate = new Date(startOfPreviousWeek);
+    //     startDate.setDate(startOfPreviousWeek.getDate() + i);
+    //     const day = startDate.getDay();
+    //     rentalsByDay[weekDay[day]] = 0;
+    // }
+    // rentals.forEach(rent => {
+    //     const day = rent.issueDate.getDay();
+    //     rentalsByDay[weekDay[day]]++
+    // })
+    // const fullNames = {"Sun":"Sunday", "Mon":"Monday", "Tue":"Tuesday", "Wed":"Wednesday", "Thur":"Thursday", "Fri":"Friday", "Sat":"Saturday"}
+    // const getFullName = (day) => {
+    //     return fullNames[day];
+    // }
+    // const rentalsByDayKeys = Object.keys(rentalsByDay);
+    // const populatedDoc = (rentalsData) => {
+    //     rentalsData.forEach(rent => {
+    //         const rental = {
+    //             "id": fullNames[rent],
+    //             "color": '',
+    //             "data": {
+    //
+    //             }
+    //         }
+    //     })
+    // }
+    // console.log(rentalsByDay);
 
-    // Calculate the start and end dates of the previous week
-    const startOfPreviousWeek = new Date(currentDate);
-    startOfPreviousWeek.setDate(currentDate.getDate() - currentDay - 6); // Subtract the current day and add 6 more days
-    const endOfPreviousWeek = new Date(startOfPreviousWeek);
-    endOfPreviousWeek.setDate(startOfPreviousWeek.getDate() + 6); // Add 6 days to get the end of the week
-
-    const rawRentals = await Rental.find();
-    const rentals = rawRentals.filter(rent => rent.issueDate.toISOString().split('T')[0] >= startOfPreviousWeek.toISOString().split('T')[0])
-    const rentalsByDay = {};
-    const weekDay = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
-    for (let i = 0; i < 7; i++) {
-        const startDate = new Date(startOfPreviousWeek);
-        startDate.setDate(startOfPreviousWeek.getDate() + i);
-        const day = startDate.getDay();
-        rentalsByDay[weekDay[day]] = 0;
-    }
-    rentals.forEach(rent => {
-        const day = rent.issueDate.getDay();
-        rentalsByDay[weekDay[day]]++
-    })
-    const fullNames = {"Sun":"Sunday", "Mon":"Monday", "Tue":"Tuesday", "Wed":"Wednesday", "Thur":"Thursday", "Fri":"Friday", "Sat":"Saturday"}
-    const getFullName = (day) => {
-        return fullNames[day];
-    }
-    const rentalsByDayKeys = Object.keys(rentalsByDay);
-    const populatedDoc = (rentalsData) => {
-        rentalsData.forEach(rent => {
-            const rental = {
-                "id": fullNames[rent],
-                "color": '',
-                "data": {
-
+    const weekStats = [
+        {
+            "id": "Mon",
+            "color": "hsl(149, 70%, 50%)",
+            "data": [
+                {
+                    "x": "History",
+                    "y": 2
+                },
+                {
+                    "x": "Geography",
+                    "y": 20
+                },
+                {
+                    "x": "Mathematics",
+                    "y": 48
+                },
+                {
+                    "x": "Physics",
+                    "y": 84
+                },
+                {
+                    "x": "Computer Science",
+                    "y": 16
+                },
+                {
+                    "x": "English",
+                    "y": 40
+                }
+            ]
+        },
+        {
+            "id": "Tue",
+            "color": "hsl(249, 70%, 50%)",
+            "data": [
+                {
+                    "x": "History",
+                    "y": 46
+                },
+                {
+                    "x": "Geography",
+                    "y": 19
+                },
+                {
+                    "x": "Mathematics",
+                    "y": 26
+                },
+                {
+                    "x": "Physics",
+                    "y": 31
+                },
+                {
+                    "x": "Computer Science",
+                    "y": 22
+                },
+                {
+                    "x": "English",
+                    "y": 40
+                }
+            ]
+        },
+        {
+            "id": "Wed",
+            "color": "hsl(327, 70%, 50%)",
+            "data": [
+                {
+                    "x": "History",
+                    "y": 17
+                },
+                {
+                    "x": "Geography",
+                    "y": 50
+                },
+                {
+                    "x": "Mathematics",
+                    "y": 49
+                },
+                {
+                    "x": "Physics",
+                    "y": 73
+                },
+                {
+                    "x": "Computer Science",
+                    "y": 53
+                },
+                {
+                    "x": "English",
+                    "y": 62
+                }
+            ]
+        },
+        {
+            "id": "Thur",
+            "color": "hsl(284, 70%, 50%)",
+            "data": [
+                {
+                    "x": "History",
+                    "y": 40
+                },
+                {
+                    "x": "Geography",
+                    "y": 34
+                },
+                {
+                    "x": "Mathematics",
+                    "y": 21
+                },
+                {
+                    "x": "Physics",
+                    "y": 32
+                },
+                {
+                    "x": "Computer Science",
+                    "y": 80
+                },
+                {
+                    "x": "English",
+                    "y": 61
+                }
+            ]
+        },
+        {
+            "id": "Fri",
+            "color": "hsl(163, 70%, 50%)",
+            "data": [
+                {
+                    "x": "History",
+                    "y": 62
+                },
+                {
+                    "x": "Geography",
+                    "y": 60
+                },
+                {
+                    "x": "Mathematics",
+                    "y": 48
+                },
+                {
+                    "x": "Physics",
+                    "y": 21
+                },
+                {
+                    "x": "Computer Science",
+                    "y": 52
+                },
+                {
+                    "x": "English",
+                    "y": 29
+                }
+            ]
+        }
+    ];
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    weekStats
                 }
             }
-        })
-    }
-    console.log(rentalsByDay);
+        )
+    ;
+})
+
+
+exports.numberOfBooks = catchAsync(async (req, res, next) => {
+    const books = [
+        {
+            mathematics: 420
+        },
+        {
+            history: 382
+        },
+        {
+            geography: 526
+        },
+        {
+            physics: 390
+        },
+        {
+            english: 730
+        },
+        {
+            literature: 204
+        }
+    ]
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    books
+                }
+            }
+        )
+    ;
 })
