@@ -100,7 +100,12 @@ exports.numRentalsPerStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.lastCreatedRentals = catchAsync(async (req, res, next) => {
-    const rentals = await Rental.find().sort('-CreatedAt').limit(10);
+    const rawRentals = await Rental.find().sort('-CreatedAt').select({nameOfBook: 1, bookId: 1, category: 1, issueDate: 1, studentId: 1}).limit(10).populate({path: 'studentId'});
+    const rentals = [];
+    rawRentals.forEach(rent => {
+        const { nameOfBook, category, issueDate, bookId, studentId } = rent;
+        rentals.push({bookId, nameOfBook, category, studentName: studentId.name , issueDate: issueDate.toISOString().split('T')[0]});
+    })
     res
         .status(200)
         .json(
@@ -115,9 +120,19 @@ exports.lastCreatedRentals = catchAsync(async (req, res, next) => {
 })
 
 exports.topStudents = catchAsync(async (req, res, next) => {
-    let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
+    let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}})
+            .populate(
+                {
+                    path: 'rentals',
+                    populate: {
+                        path: 'rentalHistory',
+                        model: 'Rental'
+                    }
+                }
+            )
+    ;
     const result = [];
-    students = students.slice(0,10);
+    students = students.slice(0, 9);
     students.forEach(student => {
         student.rentals.forEach((rent, index) => {
             if (rent.academicYear === req.params.academicYear) {

@@ -4,14 +4,15 @@ const router = express.Router();
 const {
     createTeacherRental,
     updateTeacherRental,
-    deleteTeacherRental } = require('../controllers/teachersRentalController');
+    deleteTeacherRental, getTeacherRental } = require('../controllers/teachersRentalController');
 // TODO: PROTECT ALL ROUTES
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 
 router.route('/')
     .post(createTeacherRental);
 
 router.route('/:id')
+    .get(getTeacherRental)
     .patch(updateTeacherRental)
     .delete(deleteTeacherRental)
 

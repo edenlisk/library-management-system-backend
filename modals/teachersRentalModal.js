@@ -23,7 +23,7 @@ const teachersRentalSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Enter the render']
         },
-        teacherID: {
+        teacherId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
             immutable: true
@@ -39,7 +39,7 @@ teachersRentalSchema.pre('save', async function (next) {
     if (this.isNew()) {
         const Teacher = require('../modals/teachersModal');
         const teacher = await Teacher.updateOne(
-            { _id: this.teacherID },
+            { _id: this.teacherId },
             { $push: { rentals: this._id } },
             {new: true, runValidators: true}
         )

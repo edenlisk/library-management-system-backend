@@ -1,5 +1,7 @@
 const Teacher = require('../modals/teachersModal');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const TeachersRental = require('../modals/teachersRentalModal');
 const catchAsync = require('../utils/catchAsync');
 
 
@@ -24,6 +26,8 @@ exports.getAllTeachers = catchAsync(async (req, res, next) => {
             },
             {
                 $project: {
+                   name: 1,
+                   registrationNumber: 1,
                    numberOfRentals: { $size: '$teachersRentals' }
                 }
             }
@@ -46,13 +50,13 @@ exports.getAllTeachers = catchAsync(async (req, res, next) => {
 })
 
 exports.createTeacher = catchAsync(async (req, res, next) => {
-    const newTeacher = new Teacher(
+    const newTeacher = await Teacher.create(
         {
             name: req.body.name,
-            registrationNumber: req.body.registrationNumber
+            registrationNumber: req.body.registrationNumber,
+            rentals: []
         }
     );
-    await newTeacher.save();
     res
         .status(201)
         .json(
@@ -67,7 +71,8 @@ exports.createTeacher = catchAsync(async (req, res, next) => {
 })
 
 exports.getTeacher = catchAsync(async (req, res, next) => {
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await Teacher.findOne({_id: req.params.teacherId}).select({rentals: 0});
+    if (!teacher) return next(new AppError("Teacher no longer exists!", 400));
     res
         .status(200)
         .json(
@@ -78,13 +83,29 @@ exports.getTeacher = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
+})
+
+exports.getTeacherRentals = catchAsync(async (req, res, next) => {
+    const teacherRentals = await TeachersRental.find({teacherId: req.params.teacherId})
+    // if (!teacherRentals) return next(new AppError("Teacher no longer exists!", 400));
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    teacherRentals
+                }
+            }
+        )
 })
 
 exports.updateTeacher = catchAsync(async (req, res, next) => {
-    const updatedTeacher = await Teacher.findById(req.params.id);
+    const updatedTeacher = await Teacher.findById(req.params.teacherId);
+    if (!updatedTeacher) return next(new AppError("Teacher no longer exists!", 400));
     if (req.body.name) updatedTeacher.name = req.body.name;
-    // if (req.body.registrationNumber) updatedTeacher.registrationNumber = req.body.registrationNumber;
-    await updatedTeacher.save();
+    await updatedTeacher.save({validateModifiedOnly: true});
     res
         .status(200)
         .json(
@@ -99,7 +120,7 @@ exports.updateTeacher = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteTeacher = catchAsync(async (req, res, next) => {
-    await Teacher.deleteOne({_id: req.params.id });
+    await Teacher.deleteOne({_id: req.params.teacherId });
     res
         .status(204)
         .json(
