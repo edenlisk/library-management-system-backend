@@ -62,7 +62,6 @@ bookSchema.pre('save', async function (next) {
     if (this.isNew) {
         const targetCategory = await Category.findOne({categoryName: this.categoryName});
         if (!targetCategory) return next(new AppError("Category no longer exists!", 400));
-
         if (!targetCategory) {
             return next(new AppError("Category no longer exists or Book already exists in another category", 400));
         } else {
@@ -76,6 +75,14 @@ bookSchema.pre('save', async function (next) {
             })
             await category.save({validateModifiedOnly: true})
             if (!category) return next(new AppError("Something went wrong!", 400));
+        }
+    }
+    if (this.isModified('numberOfBooks') && !this.isNew) {
+        const { numberOfBooks } = await bookModel.findOne({_id: this._id});
+        if (parseInt(numberOfBooks) < parseInt(this.numberOfBooks)) {
+            this.availableCopy += parseInt(this.numberOfBooks) - parseInt(numberOfBooks);
+        } else if (parseInt(numberOfBooks) > parseInt(this.numberOfBooks)) {
+            this.availableCopy -= parseInt(numberOfBooks) - parseInt(this.numberOfBooks);
         }
     }
     next();
