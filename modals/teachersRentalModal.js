@@ -58,14 +58,13 @@ const teachersRentalSchema = new mongoose.Schema(
 )
 
 teachersRentalSchema.pre('save', async function (next) {
-    if (this.isNew()) {
+    if (this.isNew) {
         const Teacher = require('../modals/teachersModal');
-        const teacher = await Teacher.updateOne(
-            { _id: this.teacherId },
-            { $push: { rentals: this._id } },
-            {new: true, runValidators: true}
-        )
+        const teacher = await Teacher.findOne({_id: this.teacherId});
+        console.log(teacher)
         if (!teacher) next(new AppError("teacher does not exists", 400));
+        teacher.rentals.push(this._id);
+        await teacher.save({validateModifiedOnly: true, validateBeforeSave: false});
         await Book.findOneAndUpdate(
             {_id: this.book_id},
             {$inc: {numberOfRentals: 1, availableCopy: -1}}

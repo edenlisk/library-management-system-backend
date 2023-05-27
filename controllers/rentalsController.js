@@ -2,6 +2,7 @@ const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
 const Book = require('../modals/bookModel');
 const Class = require('../modals/classModal');
+const TeachersRental = require('../modals/teachersRentalModal');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -148,6 +149,7 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
 exports.inactiveRentals = catchAsync(async (req, res, next) => {
     const rawRentals = await Rental.find({active: false})
             .populate('studentId');
+    const rawTeachersRentals = await TeachersRental.find({});
     const rentals = [];
     if (rawRentals) {
         for (const rental of rawRentals) {
@@ -166,8 +168,28 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 categoryName,
                 language,
                 academicYear,
-                studentName:name,
+                rentalFor:name,
                 className
+            }
+            rentals.push(rent);
+        }
+    }
+    if (rawTeachersRentals) {
+        for (const rental of rawTeachersRentals) {
+            const { _id, nameOfBook, author, bookId, rentalFor, categoryName, issueDate, dueDate, academicLevel, language, academicYear, book_id } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate,
+                dueDate,
+                academicLevel,
+                categoryName,
+                language,
+                academicYear,
+                rentalFor,
+                className: rentalFor
             }
             rentals.push(rent);
         }
