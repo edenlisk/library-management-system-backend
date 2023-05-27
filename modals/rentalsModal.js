@@ -10,7 +10,9 @@ const rentalSchema = new mongoose.Schema(
         },
         studentId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Student'
+            ref: 'Student',
+            immutable: false,
+            required: true
         },
         author: {
           type: String
@@ -104,9 +106,9 @@ rentalSchema.pre('deleteOne', async function(next) {
     const studentsModal = require('../modals/studentsModal');
     const { _conditions } = this;
     const rental = await rentalModal.findOne(_conditions);
+    if (!studentId) return next(new AppError("Rental does not exits!", 400));
     if (rental.returned === false) return next(new AppError("Rental cannot be deleted while not returned", 400));
     const studentId = rental.studentId;
-    if (!studentId) return next(new AppError("Rental does not exits!", 400));
     await studentsModal.updateOne(
         { _id: studentId, rentals: {$elemMatch: {academicYear: rental.academicYear}} },
         { $pull: { 'rentals.$.rentalHistory': rental._id }}

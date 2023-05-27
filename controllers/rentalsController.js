@@ -1,6 +1,7 @@
 const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
 const Book = require('../modals/bookModel');
+const Class = require('../modals/classModal');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -64,6 +65,9 @@ exports.createRental = catchAsync(async (req, res, next) => {
 
 exports.getRental = catchAsync(async (req, res, next) => {
     const rental = await Rental.findById(req.params.rentalId);
+    rental.createdAt = undefined;
+    rental.updatedAt = undefined;
+    rental.academicYear = undefined;
     res
         .status(200)
         .json(
@@ -135,6 +139,48 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
                 status: "Success",
                 data: {
                     rentalHistory
+                }
+            }
+        )
+    ;
+})
+
+exports.inactiveRentals = catchAsync(async (req, res, next) => {
+    const rawRentals = await Rental.find({active: false})
+            .populate('studentId');
+    const rentals = [];
+    if (rawRentals) {
+        for (const rental of rawRentals) {
+            const { name, classIds } = rental.studentId;
+            const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
+            const {name:className} = await Class.findOne(filteredClass[0].classId);
+            const { _id, nameOfBook, author, bookId, categoryName, issueDate, dueDate, academicLevel, language, academicYear, book_id } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate,
+                dueDate,
+                academicLevel,
+                categoryName,
+                language,
+                academicYear,
+                studentName:name,
+                className
+            }
+            rentals.push(rent);
+        }
+    }
+
+    res
+        .status(200)
+        .json(
+            {
+                status: 'Success',
+                result: rentals.length,
+                data: {
+                    rentals
                 }
             }
         )

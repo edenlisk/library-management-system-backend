@@ -1,6 +1,22 @@
 const TeachersRental = require('../modals/teachersRentalModal');
+const Book = require('../modals/bookModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+
+exports.getTeacherRentals = catchAsync(async (req, res, next) => {
+    const rentals = await TeachersRental.find({});
+    res
+        .status(200)
+        .json(
+            {
+                status: 'Success',
+                data: {
+                    rentals
+                }
+            }
+        )
+    ;
+})
 
 exports.getTeacherRental = catchAsync(async (req, res, next) => {
     const rental = await TeachersRental.findById(req.params.id);
@@ -15,27 +31,37 @@ exports.getTeacherRental = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.createTeacherRental = catchAsync(async (req, res, next) => {
-    const teacherRental = await TeachersRental.create(
-        {
-            nameOfBook: req.body.nameOfBook,
-            teacherId: req.body.teacherId,
-            numberOfBooks: req.body.numberOfBooks,
-            issueDate: req.body.issueDate,
-            rentalFor: req.body.rentalFor,
-            returned: false,
-        }
-    )
+    const book = await Book.findOne({_id: req.body.book_id});
+    if (!book) return next(new AppError("This book does not exist!", 400));
+    const { bookName, _id, author, academicLevel, categoryName, language } = book;
+    const { booksIds } = req.body;
+    for (const booksId of booksIds) {
+        await TeachersRental.create(
+            {
+                nameOfBook: bookName,
+                author,
+                academicLevel,
+                language,
+                categoryName,
+                book_id: _id,
+                bookId: booksId,
+                teacherId: req.body.teacherId,
+                issueDate: req.body.issueDate,
+                dueDate: req.body.dueDate,
+                rentalFor: req.body.rentalFor
+            }
+        )
+    }
+
     res
         .status(201)
         .json(
             {
                 status: "Success",
-                data: {
-                    teacherRental
-                }
             }
         )
     ;
@@ -48,6 +74,7 @@ exports.updateTeacherRental = catchAsync(async (req, res, next) => {
     if (req.body.numberOfBooks) updatedTeacherRental.numberOfBooks = req.body.numberOfBooks;
     if (req.body.rentalFor) updatedTeacherRental.rentalFor = req.body.rentalFor;
     if (req.body.returned) updatedTeacherRental.returned = req.body.returned;
+    if (req.body.active) updatedTeacherRental.active = req.body.active;
     await updatedTeacherRental.save({validateModifiedOnly: true});
     res
         .status(201)
