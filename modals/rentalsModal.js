@@ -74,13 +74,18 @@ rentalSchema.pre('save', async function(next) {
         )
         await Book.findOneAndUpdate(
             {_id: this.book_id},
-            {$inc: {numberOfRentals: 1}},
+            {$inc: {numberOfRentals: 1, availableCopy: -1 }},
             {new: true}
         )
         if (!student) return next(new AppError("Student or academic Year does not exists!", 400));
     }
     if (this.isModified('returned') && !this.isNew) {
         if (this.returned === true) {
+            await Book.findOneAndUpdate(
+                {_id: this.book_id},
+                {$inc: {availableCopy: 1}},
+                {new: true}
+            )
             this.active = undefined;
             this.nextActiveDate = undefined;
         }
