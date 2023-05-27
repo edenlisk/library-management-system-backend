@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const { overDueRentalsCronJob, inactiveRentalsCronJob } = require('./utils/cron');
 
 const rateLimit = require('express-rate-limit');
 const AppError = require('./utils/appError');
@@ -23,6 +24,8 @@ const teachersRentalRouter = require('./routes/teachersRentalRoutes');
 const academicYearRouter = require('./routes/academicYearRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const statsRoutes = require('./routes/statsRoutes');
+const booksRoutes = require('./routes/booksRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 // const reportsRouter = require('./routes/reportsRoutes');
 
 const app = express();
@@ -40,6 +43,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+overDueRentalsCronJob();
+inactiveRentalsCronJob();
+
 
 const limiter = rateLimit(
     {
@@ -77,6 +83,8 @@ app.use('/api/v1/teachers', teachersRouter);
 app.use('/api/v1/teachers-rental', teachersRentalRouter);
 app.use('/api/v1/academic-year', academicYearRouter);
 app.use('/api/v1/statistics', statsRoutes);
+app.use('/api/v1/books', booksRoutes);
+app.use('/api/v1/book-category', categoryRoutes);
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`));
 })

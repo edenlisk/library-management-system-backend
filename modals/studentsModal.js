@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Class = require('../modals/classModal');
 const Rental = require('../modals/rentalsModal');
+const Book = require('../modals/bookModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -85,6 +86,14 @@ studentSchema.methods.removeStudent = async function (req) {
         {_id: req.params.classId, students: req.params.studentId, academicYear: req.params.academicYear},
         {$pull: {students: req.params.studentId}}
     )
+    const rentals = await Rental.findOne({studentId: req.params.studentId, academicYear: req.params.academicYear});
+    if (rentals) {
+        for (const rental of rentals) {
+            const { book_id } = rental;
+            await Book.updateOne({ _id: book_id }, { $inc: { numberOfRentals: -1 } }, { runValidators: true } )
+        }
+    }
+
     await Rental.deleteMany(
         {studentId: req.params.studentId, academicYear: req.params.academicYear}
     )
@@ -96,7 +105,7 @@ studentSchema.methods.removeStudent = async function (req) {
     });
     student.rentals.forEach((rent) => {
         if (rent.academicYear === req.params.academicYear) {
-            student.rentals.rentalHistory = 0;
+            student.rentals.rentalHistory = [];
         }
     })
 
@@ -109,9 +118,9 @@ studentSchema.pre('save', async function(next) {
         const targetClass = await Class.updateOne(
             { _id: this.currentClassId, academicYear: this.academicYear },
             { $push: { students: this._id } },
-            { new: true }
+            { new: true, runValidators: true }
         )
-        if (!targetClass) next(new AppError("Class does not exists!", 400));
+        if (!targetClass) return next(new AppError("Class does not exists!", 400));
         this.classIds.push({academicYear: this.academicYear, classId: this.currentClassId});
         this.academicYear = undefined;
         this.currentClassId = undefined;
@@ -125,7 +134,7 @@ studentSchema.pre('insertMany', async function (next, docs, options) {
     for (let i = 0; i < docs.length; i++) {
         const student = await studentsModal.findOne({registrationNumber: docs[i].registrationNumber});
         if (student) {
-            console.log(docs[i]._id);
+            // console.log(docs[i]._id);
             if (targetClass.students.includes(student._id) || student.classIds.some(obj => obj.classId === targetClass._id)) {
                 docs.splice(i, 1);
             } else {

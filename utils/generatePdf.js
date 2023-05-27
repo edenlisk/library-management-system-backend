@@ -59,27 +59,32 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
     const rentalsData = [[{text: "Name of book"}, {text: 'returned'}]];
     const populateRentals = (rentalsInfo, rentalsData) => {
         rentalsInfo.forEach(rental => {
-            rentalsData.push([{text: rental.nameOfBook}, {text: rental.returned}])
+            rentalsData.push([{text: rental.nameOfBook.charAt(0).toUpperCase() + rental.nameOfBook.slice(1)}, {text: rental.returned}])
         })
         return rentalsData;
     }
     const tableData = [
-        [{text: "student name"}, 'reg number', 'rentals', "penalty fee (RWF)"]
+        [
+            {text: "student name", margin: [0, 5, 0, 2], fillColor: '#93c6e8'},
+            {text: 'reg number', margin: [0, 5, 0, 2], fillColor: '#93c6e8'},
+            {text: 'rentals', margin: [0, 5, 0, 2], fillColor: '#93c6e8'},
+            {text: "penalty fee (RWF)", margin: [0, 5, 0, 2], fillColor: '#93c6e8'}
+        ]
     ];
     const populatedDoc = (studentsData, tableData) => {
         studentsData.forEach(student => {
             student.rentals = student.rentals.filter(rent => rent.academicYear === targetClass.academicYear)
             tableData.push(
                 [
-                    {text: student.name, alignment: 'left'},
-                    {text: student.registrationNumber, alignment: 'left'},
+                    {text: student.name, alignment: 'left' , margin: [0, 5, 0, 2]},
+                    {text: student.registrationNumber, alignment: 'left', margin: [0, 5, 0, 2]},
                     student.rentals[0].rentalHistory.length ? ({table:
                             {
                                 width: ['auto', 'auto'],
                                 body: populateRentals(student.rentals[0].rentalHistory, rentalsData)
                             }
-                    }) : {text: "none", alignment: 'center'},
-                    {text: student.fine, alignment: 'center'}
+                    }) : {text: "None", alignment: 'center', margin: [0, 5, 0, 2]},
+                    {text: student.fine, alignment: 'center', margin: [0, 5, 0, 2]}
                 ]
             );
         })
@@ -88,12 +93,12 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
 
     const docDefinition = {
         pageOrientation: 'landscape',
-        pageMargins: [90, 40, 50, 50],
+        pageMargins: [40, 50, 40, 50],
         content: [
             {text: `Library History for ${className} in ${targetClass.academicYear}`, alignment: 'left', margin: [30, 20, 30, 20], fontSize: 25},
             {
                 table: {
-                    width: ['100', 'auto', '500', '*'],
+                    width: ['*', '*', '*', 'auto'],
                     body: populatedDoc(students, tableData),
                 },
                 alignment: 'center',
@@ -124,18 +129,29 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
     const studentRentals = await Rental.find({studentId: req.params.studentId})
     if (!student) return next(new AppError("Student no longer exists", 403));
     const studentData = [
-        [{text: "book id"}, {text: "book name"}, {text: "category"}, {text: "issue date"}, {text: "due date"}, {text: "returned"}]
+        [
+            {text: "book id", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: "book name", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: "category", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: "issue date", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: "due date", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: "return date", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: "returned", fillColor: '#93c6e8', margin: [0, 5, 0, 2]}
+        ]
     ]
     const populateDoc = (rentalsInfo, studentData) => {
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        rentalsInfo.forEach(rental => {
+        rentalsInfo.forEach((rental, index) => {
+            const color = index % 2 === 0 ? '#ffffff' : '#c0cdd4';
             studentData.push(
                 [
-                    {text: rental.bookId},
-                    {text: rental.nameOfBook},
-                    {text: rental.category},
-                    {text: rental.issueDate.toISOString().split('T')[0]},
-                    {text: rental.dueDate.toISOString().split('T')[0]}, {text: rental.returned}
+                    {text: rental.bookId, margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rental.nameOfBook.charAt(0).toUpperCase() + rental.nameOfBook.slice(1), margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rental.categoryName.charAt(0).toUpperCase() + rental.categoryName.slice(1), margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rental.issueDate.toISOString().split('T')[0], margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rental.dueDate.toISOString().split('T')[0], margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rental.returnDate ? rental.returnDate.toISOString().split('T')[0] : "", margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rental.returned, margin: [0, 5, 0, 2], fillColor: color}
                 ]
             )
         })
@@ -145,12 +161,12 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
 
     const docDefinition = {
         pageOrientation: 'landscape',
-        pageMargins: [70, 50, 40, 50],
+        pageMargins: [40, 50, 40, 50],
         content: [
-            {text: `Library History for ${student.name} (${student.registrationNumber})`, alignment: 'left', margin: [30, 20, 30, 20], fontSize: 25},
+            {text: `Library History for ${student.name} (${student.registrationNumber})`, alignment: 'center', margin: [0, 20, 0, 10], fontSize: 25},
             {
                 table: {
-                    width: ['*', '*', '*', '*', '*', 'auto'],
+                    width: ['*', '*', '*', '*', '*', '*', 'auto'],
                     body: populateDoc(studentRentals, studentData),
                     alignment: 'center',
                 },

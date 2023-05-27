@@ -1,5 +1,6 @@
 const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
+const Book = require('../modals/bookModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -27,15 +28,23 @@ exports.getAllRentals = catchAsync(async (req, res, next) => {
 })
 
 exports.createRental = catchAsync(async (req, res, next) => {
+    const book = await Book.findOne({_id: req.body.book_id});
+    if (!book) return next(new AppError("This Book does not exist!", 400));
+    const { bookName, _id, author, academicLevel, categoryName, language } = book;
+    const student = await Rental.findOne({studentId: req.params.studentId, book_id: _id, returned: false});
+    if (student) return next(new AppError("Student already has this book", 400));
     const newRental = new Rental(
         {
-            nameOfBook: req.body.nameOfBook,
-            studentId: req.params.studentId,
+            nameOfBook: bookName,
+            author,
+            academicLevel,
+            language,
+            categoryName,
+            book_id: _id,
             bookId: req.body.bookId,
             issueDate: req.body.issueDate,
             dueDate: req.body.dueDate,
-            category: req.body.category,
-            // nameOfLender: req.body.nameOfBook,
+            studentId: req.params.studentId,
             academicYear: req.params.academicYear
         }
     );
@@ -71,13 +80,11 @@ exports.getRental = catchAsync(async (req, res, next) => {
 exports.updateRental = catchAsync(async (req, res, next) => {
     const updatedRental = await Rental.findById(req.params.rentalId);
     if (!updatedRental) return next(new AppError("This rental does not exists!", 400));
-    if (req.body.nameOfBook) updatedRental.nameOfBook = req.body.nameOfBook;
-    // if (req.body.bookId) updatedRental.bookId = req.body.bookId;
-    // if (req.body.category) updatedRental.category = req.body.category;
-    // if (req.body.author) updatedRental.author = req.body.author;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
+    if (req.body.returnDate) updatedRental.returnDate = req.body.returnDate;
     if (req.body.returned) updatedRental.returned = req.body.returned;
-    // if (req.body.nameOfLender) updatedRental.nameOfLender = req.body.nameOfLender;
+    if (req.body.bookId) updatedRental.bookId = req.body.bookId;
+    if (req.body.active) updatedRental.active = req.body.active;
     await updatedRental.save({validateModifiedOnly: true});
     res
         .status(200)

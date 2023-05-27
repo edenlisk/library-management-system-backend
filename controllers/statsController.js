@@ -1,6 +1,8 @@
 const Class = require('../modals/classModal');
+const Category = require('../modals/categoryModel');
 const Student = require('../modals/studentsModal');
 const Rental = require('../modals/rentalsModal');
+const Book = require('../modals/bookModel');
 const catchAsync = require('../utils/catchAsync');
 
 
@@ -119,6 +121,166 @@ exports.lastCreatedRentals = catchAsync(async (req, res, next) => {
     ;
 })
 
+exports.topBooks = catchAsync(async (req, res, next) => {
+    const topBooks = await Book.find({})
+        .select({edition: 0, language: 0, numberOfBooks: 0})
+        .sort({numberOfRentals: -1})
+        .limit(10)
+    ;
+
+
+    res
+        .status(200)
+        .json(
+            {
+                status: 'Success',
+                data: {
+                    topBooks
+                }
+            }
+        )
+    ;
+})
+
+exports.numberOfRentalsByCategory = catchAsync(async (req, res, next) => {
+    // const numberOfRentalsPerCategory = await Book.aggregate(
+    //     [
+    //         {
+    //             $group: {
+    //                 _id: '$categoryName',
+    //                 rentalCount: { $sum: '$numberOfRentals' }
+    //             }
+    //         }
+    //     ]
+    // )
+    //
+    // res
+    //     .status(200)
+    //     .json(
+    //         {
+    //             status: "Success",
+    //             data: {
+    //                 numberOfRentalsPerCategory
+    //             }
+    //         }
+    //     )
+
+    const numberOfRentalsPerCategory = await Book.aggregate(
+        [
+            {
+                $group: {
+                    _id: {
+                        categoryName: '$categoryName',
+                        academicLevel: '$academicLevel',
+                    },
+                    rentalCount: { $sum: '$numberOfRentals' },
+                    bookCount: { $sum: '$numberOfBooks' },
+                },
+            },
+            {
+                $project: {
+                    categoryName: '$_id.categoryName',
+                    academicLevel: '$_id.academicLevel',
+                    rentalCount: 1,
+                    bookCount: 1,
+                    _id: 0,
+                },
+            },
+        ]
+    )
+    const templateObj = {
+            id: "Senior Two",
+            data: [
+                {
+                    x: 'math',
+                    y: 20
+                },
+                {
+                    x: 'physics',
+                    y: 34
+                },
+                {
+                    x: 'history',
+                    y: 54
+                },
+                {
+                    x: 'geography',
+                    y: 46
+                },
+                {
+                    x: 'literature',
+                    y: 74
+                },
+                {
+                    x: 'chemistry',
+                    y: 34
+                },
+                {
+                    x: 'english',
+                    y: 59
+                },
+                {
+                    x: 'novel',
+                    y: 52
+                },
+                {
+                    x: 'swahili',
+                    y: 42
+                },
+                {
+                    x: 'french',
+                    y: 30
+                },
+                {
+                    x: "comp science",
+                    y: 38
+                },
+                {
+                    x: "ent",
+                    y: 46
+                }
+            ]
+    }
+    const levels = {"s1": "Senior One", "s2": "Senior Two", "s3": "Senior Three", "s4": "Senior Four", "s5": "Senior Five", "s6": "Senior Six", "other": "Other"}
+    let result = {};
+    const sortResult = (data) => {
+        data.forEach(datum => {
+            result[datum.academicLevel] = data.filter(dt => dt.academicLevel === datum.academicLevel);
+        })
+    }
+    sortResult(numberOfRentalsPerCategory);
+    const resultIds = Object.keys(result);
+    const numberOfRentalsByCategory = [];
+    resultIds.forEach(id => {
+        let data = [];
+        result[id].forEach(elem => {
+            const item = {
+                x: elem.categoryName,
+                y: elem.rentalCount
+            }
+            data.push(item)
+        })
+        const record = {
+            "id": levels[id],
+            data
+        }
+        numberOfRentalsByCategory.push(record)
+    })
+
+
+
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    numberOfRentalsByCategory
+                }
+            }
+        )
+})
+
 exports.topStudents = catchAsync(async (req, res, next) => {
     let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}})
             .populate(
@@ -207,194 +369,235 @@ exports.weeklyStats = catchAsync(async (req, res, next) => {
     //     })
     // }
     // console.log(rentalsByDay);
+    // Retrieve rentals where the book is not returned or return date is after due date
+    // const overdueRentals = await Rental.find({ returned: false, returnDate: undefined });
+    // // Calculate and update fines for each student
+    // for (const rental of overdueRentals) {
+    //     let { studentId, dueDate } = rental;
+    //     dueDate = dueDate.toISOString().split('T')[0];
+    //     const currentDate = new Date().toISOString().split('T')[0];
+    //     currentDate >= dueDate ? await Student.findByIdAndUpdate(studentId, {$inc: {fine: 100}}) : await Student.findByIdAndUpdate(studentId, {$inc: {fine: 0}});
+    // }
 
-    const weekStats = [
+    // const weekStats = [
+    //     {
+    //         "id": "Mon",
+    //         "color": "hsl(149, 70%, 50%)",
+    //         "data": [
+    //             {
+    //                 "x": "History",
+    //                 "y": 2
+    //             },
+    //             {
+    //                 "x": "Geography",
+    //                 "y": 20
+    //             },
+    //             {
+    //                 "x": "Mathematics",
+    //                 "y": 48
+    //             },
+    //             {
+    //                 "x": "Physics",
+    //                 "y": 84
+    //             },
+    //             {
+    //                 "x": "Computer Science",
+    //                 "y": 16
+    //             },
+    //             {
+    //                 "x": "English",
+    //                 "y": 40
+    //             }
+    //         ]
+    //     },
+    //     {
+    //         "id": "Tue",
+    //         "color": "hsl(249, 70%, 50%)",
+    //         "data": [
+    //             {
+    //                 "x": "History",
+    //                 "y": 46
+    //             },
+    //             {
+    //                 "x": "Geography",
+    //                 "y": 19
+    //             },
+    //             {
+    //                 "x": "Mathematics",
+    //                 "y": 26
+    //             },
+    //             {
+    //                 "x": "Physics",
+    //                 "y": 31
+    //             },
+    //             {
+    //                 "x": "Computer Science",
+    //                 "y": 22
+    //             },
+    //             {
+    //                 "x": "English",
+    //                 "y": 40
+    //             }
+    //         ]
+    //     },
+    //     {
+    //         "id": "Wed",
+    //         "color": "hsl(327, 70%, 50%)",
+    //         "data": [
+    //             {
+    //                 "x": "History",
+    //                 "y": 17
+    //             },
+    //             {
+    //                 "x": "Geography",
+    //                 "y": 50
+    //             },
+    //             {
+    //                 "x": "Mathematics",
+    //                 "y": 49
+    //             },
+    //             {
+    //                 "x": "Physics",
+    //                 "y": 73
+    //             },
+    //             {
+    //                 "x": "Computer Science",
+    //                 "y": 53
+    //             },
+    //             {
+    //                 "x": "English",
+    //                 "y": 62
+    //             }
+    //         ]
+    //     },
+    //     {
+    //         "id": "Thur",
+    //         "color": "hsl(284, 70%, 50%)",
+    //         "data": [
+    //             {
+    //                 "x": "History",
+    //                 "y": 40
+    //             },
+    //             {
+    //                 "x": "Geography",
+    //                 "y": 34
+    //             },
+    //             {
+    //                 "x": "Mathematics",
+    //                 "y": 21
+    //             },
+    //             {
+    //                 "x": "Physics",
+    //                 "y": 32
+    //             },
+    //             {
+    //                 "x": "Computer Science",
+    //                 "y": 80
+    //             },
+    //             {
+    //                 "x": "English",
+    //                 "y": 61
+    //             }
+    //         ]
+    //     },
+    //     {
+    //         "id": "Fri",
+    //         "color": "hsl(163, 70%, 50%)",
+    //         "data": [
+    //             {
+    //                 "x": "History",
+    //                 "y": 62
+    //             },
+    //             {
+    //                 "x": "Geography",
+    //                 "y": 60
+    //             },
+    //             {
+    //                 "x": "Mathematics",
+    //                 "y": 48
+    //             },
+    //             {
+    //                 "x": "Physics",
+    //                 "y": 21
+    //             },
+    //             {
+    //                 "x": "Computer Science",
+    //                 "y": 52
+    //             },
+    //             {
+    //                 "x": "English",
+    //                 "y": 29
+    //             }
+    //         ]
+    //     }
+    // ];
+    // res
+    //     .status(200)
+    //     .json(
+    //         {
+    //             status: "Success",
+    //             data: {
+    //                 weekStats
+    //             }
+    //         }
+    //     )
+    // ;
+
+
+    const currentDate = new Date(); // Get the current date
+    const currentDay = currentDate.getDay(); // Get the current day of the week (0-6, where 0 is Sunday)
+
+    // Calculate the start and end dates of the previous week
+    const startOfPreviousWeek = new Date(currentDate);
+    startOfPreviousWeek.setDate(currentDate.getDate() - currentDay - 7); // Subtract the current day and add 6 more days
+    const endOfPreviousWeek = new Date(startOfPreviousWeek);
+    endOfPreviousWeek.setDate(startOfPreviousWeek.getDate() + 6); // Add 6 days to get the end of the week
+    const issuedRentals = await Rental.countDocuments(
         {
-            "id": "Mon",
-            "color": "hsl(149, 70%, 50%)",
-            "data": [
-                {
-                    "x": "History",
-                    "y": 2
-                },
-                {
-                    "x": "Geography",
-                    "y": 20
-                },
-                {
-                    "x": "Mathematics",
-                    "y": 48
-                },
-                {
-                    "x": "Physics",
-                    "y": 84
-                },
-                {
-                    "x": "Computer Science",
-                    "y": 16
-                },
-                {
-                    "x": "English",
-                    "y": 40
-                }
-            ]
-        },
-        {
-            "id": "Tue",
-            "color": "hsl(249, 70%, 50%)",
-            "data": [
-                {
-                    "x": "History",
-                    "y": 46
-                },
-                {
-                    "x": "Geography",
-                    "y": 19
-                },
-                {
-                    "x": "Mathematics",
-                    "y": 26
-                },
-                {
-                    "x": "Physics",
-                    "y": 31
-                },
-                {
-                    "x": "Computer Science",
-                    "y": 22
-                },
-                {
-                    "x": "English",
-                    "y": 40
-                }
-            ]
-        },
-        {
-            "id": "Wed",
-            "color": "hsl(327, 70%, 50%)",
-            "data": [
-                {
-                    "x": "History",
-                    "y": 17
-                },
-                {
-                    "x": "Geography",
-                    "y": 50
-                },
-                {
-                    "x": "Mathematics",
-                    "y": 49
-                },
-                {
-                    "x": "Physics",
-                    "y": 73
-                },
-                {
-                    "x": "Computer Science",
-                    "y": 53
-                },
-                {
-                    "x": "English",
-                    "y": 62
-                }
-            ]
-        },
-        {
-            "id": "Thur",
-            "color": "hsl(284, 70%, 50%)",
-            "data": [
-                {
-                    "x": "History",
-                    "y": 40
-                },
-                {
-                    "x": "Geography",
-                    "y": 34
-                },
-                {
-                    "x": "Mathematics",
-                    "y": 21
-                },
-                {
-                    "x": "Physics",
-                    "y": 32
-                },
-                {
-                    "x": "Computer Science",
-                    "y": 80
-                },
-                {
-                    "x": "English",
-                    "y": 61
-                }
-            ]
-        },
-        {
-            "id": "Fri",
-            "color": "hsl(163, 70%, 50%)",
-            "data": [
-                {
-                    "x": "History",
-                    "y": 62
-                },
-                {
-                    "x": "Geography",
-                    "y": 60
-                },
-                {
-                    "x": "Mathematics",
-                    "y": 48
-                },
-                {
-                    "x": "Physics",
-                    "y": 21
-                },
-                {
-                    "x": "Computer Science",
-                    "y": 52
-                },
-                {
-                    "x": "English",
-                    "y": 29
-                }
-            ]
+            issueDate: {
+                $gt: new Date(startOfPreviousWeek.toISOString().split('T')[0]),
+                $lt: new Date(endOfPreviousWeek.toISOString().split('T')[0])
+            }
         }
-    ];
+    );
+    const returnedRentals = await Rental.countDocuments(
+        {
+            returnDate: {
+                $gt: new Date(startOfPreviousWeek.toISOString().split('T')[0]),
+                $lt: new Date(endOfPreviousWeek.toISOString().split('T')[0])
+            }
+        }
+    )
+    const response = [
+        {
+            "id": 'issued',
+            "label": "Issued Books",
+            "value": issuedRentals || parseInt((Math.random() * 100).toString().split('.')[0])
+        },
+        {
+            "id": 'returned',
+            "label": 'Returned Books',
+            "value": returnedRentals || parseInt((Math.random() * 100).toString().split('.')[0])
+        }
+    ]
+
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    weekStats
+                    response
                 }
             }
         )
-    ;
+
 })
 
-
 exports.numberOfBooks = catchAsync(async (req, res, next) => {
-    const books = [
-        {
-            mathematics: 420
-        },
-        {
-            history: 382
-        },
-        {
-            geography: 526
-        },
-        {
-            physics: 390
-        },
-        {
-            english: 730
-        },
-        {
-            literature: 204
-        }
-    ]
+    const books = await Book.find({})
+            .select({edition: 0, author: 0, language: 0})
+    ;
     res
         .status(200)
         .json(
@@ -402,6 +605,24 @@ exports.numberOfBooks = catchAsync(async (req, res, next) => {
                 status: "Success",
                 data: {
                     books
+                }
+            }
+        )
+    ;
+})
+
+exports.notification = catchAsync(async (req, res, next) => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    const notificationDate = new Date(new Date(today).toISOString().split('T')[0]);
+    const rentals = await Rental.find({ dueDate: notificationDate });
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    rentals
                 }
             }
         )

@@ -72,6 +72,14 @@ classSchema.pre('deleteOne', async function (next) {
         {$pull: {classIds: {academicYear: targetClass.academicYear, classId: targetClass._id}}}
     );
 
+    for (const student of students) {
+        student.rentals.forEach((rent, index) => {
+            if (rent.academicYear === targetClass.academicYear) {
+                student.rentals.splice(index, 1);
+            }
+        })
+    }
+
     let studentsIdentifiers = [];
     students.forEach((stu) => {
         studentsIdentifiers.push(stu._id);

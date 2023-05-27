@@ -251,10 +251,10 @@ exports.importStudents = catchAsync(async (req, res, next) => {
         return data.some(obj => obj.academicYear === targetClass.academicYear)
     }
     if (!targetClass) {
-        next(new AppError("Class does not exists", 401));
+        return next(new AppError("Class does not exists", 401));
     } else {
         const students = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
-        if (!students) next(new AppError("No data found in this file", 400));
+        if (!students) return next(new AppError("No data found in this file", 400));
         for (let i = 0; i < students.length; i++) {
             const student = await Student.findOne({registrationNumber: students[i].registrationNumber});
             if (student) {
