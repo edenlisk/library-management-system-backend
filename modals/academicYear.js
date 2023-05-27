@@ -23,6 +23,9 @@ const academicYearSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         }
+    },
+    {
+        indexes: [{ unique: true, fields: ['academicYear'] }],
     }
 )
 

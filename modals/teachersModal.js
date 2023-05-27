@@ -21,6 +21,9 @@ const teacherSchema = new mongoose.Schema(
             ],
             default: []
         }
+    },
+    {
+        indexes: [{ unique: true, fields: ['registrationNumber'] }],
     }
 )
 

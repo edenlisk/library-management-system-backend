@@ -30,7 +30,8 @@ const studentSchema = new mongoose.Schema(
                 {
                     academicYear: {
                         type: String,
-                        unique: false
+                        required: true
+                        // unique: false
                     },
                     classId: {
                         type: mongoose.Schema.Types.ObjectId,
@@ -70,6 +71,9 @@ const studentSchema = new mongoose.Schema(
                 message: "Fine can't be negative"
             }
         }
+    },
+    {
+        indexes: [{ unique: true, fields: ['registrationNumber'] }],
     }
 )
 

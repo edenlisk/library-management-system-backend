@@ -47,6 +47,9 @@ const librarianSchema = new mongoose.Schema(
         passwordResetToken: String,
         passwordResetExpires: Date,
         profileImage: String
+    },
+    {
+        indexes: [{ unique: true, fields: ['registrationNumber'] }],
     }
 );
 

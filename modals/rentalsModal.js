@@ -60,7 +60,9 @@ const rentalSchema = new mongoose.Schema(
         nextActiveDate: {
             type: Date
         }
-    }, {timestamps: true});
+    },
+    {timestamps: true}
+);
 
 
 rentalSchema.pre('save', async function(next) {
