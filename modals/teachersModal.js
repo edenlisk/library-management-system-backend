@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Book = require('../modals/bookModel');
 
 const teacherSchema = new mongoose.Schema(
     {
@@ -31,7 +32,18 @@ teacherSchema.pre('deleteOne', async function(next) {
     try {
         const TeachersRentalModal = require('../modals/teachersRentalModal');
         const { _conditions } = this;
+        const rentals = await TeachersRentalModal.find({teacherId: _conditions._id});
         await TeachersRentalModal.deleteMany({ teacherID: _conditions._id });
+        if (rentals) {
+            for (const rental of rentals) {
+                const { book_id } = rental;
+                await Book.updateOne(
+                    { _id: book_id },
+                    { $inc: { numberOfRentals: -1 } },
+                    { runValidators: true }
+                )
+            }
+        }
         next();
     } catch (e) {
         next(e);

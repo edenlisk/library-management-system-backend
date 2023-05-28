@@ -90,7 +90,7 @@ studentSchema.methods.removeStudent = async function (req) {
         {_id: req.params.classId, students: req.params.studentId, academicYear: req.params.academicYear},
         {$pull: {students: req.params.studentId}}
     )
-    const rentals = await Rental.findOne({studentId: req.params.studentId, academicYear: req.params.academicYear});
+    const rentals = await Rental.find({studentId: req.params.studentId, academicYear: req.params.academicYear});
     if (rentals) {
         for (const rental of rentals) {
             const { book_id } = rental;
