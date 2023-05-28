@@ -189,7 +189,7 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 language,
                 academicYear,
                 rentalFor,
-                className: rentalFor
+                className: ""
             }
             rentals.push(rent);
         }
