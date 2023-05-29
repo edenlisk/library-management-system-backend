@@ -75,6 +75,7 @@ exports.updateTeacherRental = catchAsync(async (req, res, next) => {
     if (req.body.rentalFor) updatedTeacherRental.rentalFor = req.body.rentalFor;
     if (req.body.returned) updatedTeacherRental.returned = req.body.returned;
     if (req.body.active) updatedTeacherRental.active = req.body.active;
+    if (req.body.returnDate) updatedTeacherRental.returnDate = req.body.returnDate;
     await updatedTeacherRental.save({validateModifiedOnly: true});
     res
         .status(201)
