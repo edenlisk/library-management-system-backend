@@ -628,3 +628,36 @@ exports.notification = catchAsync(async (req, res, next) => {
         )
     ;
 })
+
+exports.totalRevenue = catchAsync(async (req, res, next) => {
+    const revenues = await Student.aggregate(
+        [
+            {
+                $match: {}
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: {$sum: '$fine'}
+                }
+            },
+            {
+                $project: {
+                    _id: 0
+                }
+            }
+        ]
+    )
+    const revenue = revenues[0];
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    revenue
+                }
+            }
+        )
+    ;
+})
