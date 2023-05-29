@@ -29,7 +29,7 @@ const teachersRentalSchema = new mongoose.Schema(
         },
         returnDate: {
           type: Date,
-          default: null
+          default: () => null
         },
         academicLevel: {
             type: String
