@@ -36,7 +36,8 @@ const rentalSchema = new mongoose.Schema(
             required: true
         },
         returnDate: {
-          type: Date
+          type: Date,
+          default: () => null
         },
         academicLevel: {
           type: String
