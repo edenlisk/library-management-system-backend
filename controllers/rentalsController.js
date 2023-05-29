@@ -169,7 +169,8 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 language,
                 academicYear,
                 rentalFor:name,
-                className
+                className,
+                model: 'student'
             }
             rentals.push(rent);
         }
@@ -182,14 +183,15 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 nameOfBook,
                 author,
                 bookId,
-                issueDate,
-                dueDate,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
                 academicLevel,
                 categoryName,
                 language,
                 academicYear,
                 rentalFor,
-                className: rentalFor
+                className: "",
+                model: 'teacher'
             }
             rentals.push(rent);
         }
