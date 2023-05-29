@@ -19,7 +19,7 @@ exports.getTeacherRentals = catchAsync(async (req, res, next) => {
 })
 
 exports.getTeacherRental = catchAsync(async (req, res, next) => {
-    const rental = await TeachersRental.findById(req.params.id);
+    const rental = await TeachersRental.findOne({_id: req.params.id});
     if (!rental) return next(new AppError("Rental does not exits", 401));
     res
         .status(200)
