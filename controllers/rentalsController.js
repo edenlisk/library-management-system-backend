@@ -169,7 +169,8 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 language,
                 academicYear,
                 rentalFor:name,
-                className
+                className,
+                model: 'student'
             }
             rentals.push(rent);
         }
@@ -189,7 +190,8 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 language,
                 academicYear,
                 rentalFor,
-                className: ""
+                className: "",
+                model: 'teacher'
             }
             rentals.push(rent);
         }
