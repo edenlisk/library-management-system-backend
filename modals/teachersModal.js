@@ -20,7 +20,7 @@ const teacherSchema = new mongoose.Schema(
                     ref: 'TeachersRental'
                 }
             ],
-            default: []
+            default: () => []
         }
     },
     {
