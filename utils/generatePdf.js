@@ -186,3 +186,128 @@ exports.generateStudentReport = catchAsync(async (req, res, next) => {
     pdfDoc.pipe(res);
     pdfDoc.end();
 })
+
+exports.generateNotificationReport = catchAsync(async (req, res, next) => {
+    const today = new Date();
+    const currentDate = new Date();
+    const startDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1)).toISOString().split('T')[0];
+    today.setDate(today.getDate() + 1);
+    const notificationDate = new Date(new Date(today).toISOString().split('T')[0]);
+    const teachersRentals = await Rental.find(
+        {
+            dueDate: {
+                $gt: startDate,
+                $lte: notificationDate
+            },
+            // returned: false,
+            // active: true
+        }
+    );
+    const rentals = await Rental.find(
+        {
+            dueDate: {
+                $gt: startDate,
+                $lte: notificationDate
+            },
+            // returned: false,
+            // active: true
+        }
+    ).populate('studentId')
+    const notify = [];
+    if (rentals) {
+        for (const rental of rentals) {
+            const { name, classIds } = rental.studentId;
+            const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
+            const {name:className} = await Class.findOne(filteredClass[0].classId);
+            const { _id, nameOfBook, author, bookId, categoryName, issueDate, dueDate, academicLevel } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                academicLevel,
+                categoryName,
+                rentalFor:name,
+                className,
+                model: 'student'
+            }
+            notify.push(rent);
+        }
+    }
+    if (teachersRentals) {
+        for (const rental of teachersRentals) {
+            const { _id, nameOfBook, author, bookId, rentalFor, categoryName, issueDate, dueDate, academicLevel } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                academicLevel,
+                categoryName,
+                rentalFor: rentalFor || null,
+                className: null,
+                model: 'teacher'
+            }
+            notify.push(rent);
+        }
+    }
+    const rentalsDoc = [
+        [
+            {text: '#', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Borrower', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Book Id', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Name of book', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Issue date', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Due date', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Category', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+        ]
+    ]
+    const populateDoc = (rentalsHistory, output) => {
+        rentalsHistory.forEach((rent, index) => {
+            const color = index % 2 === 0 ? '#ffffff' : '#c0cdd4';
+            output.push(
+                [
+                    {text: index, margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.rentalFor ? rent.rentalFor : rent.model.charAt(0).toUpperCase() + rent.model.slice(1), margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.bookId, margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.nameOfBook.charAt(0).toUpperCase() + rent.nameOfBook.slice(1), margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.issueDate, margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.dueDate, margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.categoryName.charAt(0).toUpperCase() + rent.categoryName.slice(1), margin: [0, 5, 0, 2], fillColor: color}
+                ]
+            )
+        })
+        return output;
+    }
+
+    const docDefinition = {
+        pageOrientation: 'landscape',
+        pageMargins: [40, 50, 40, 50],
+        content: [
+            {text: `All rentals ending from ${startDate} to ${notificationDate.toISOString().split('T')[0]}`, alignment: 'center', margin: [0, 20, 0, 10], fontSize: 25},
+            {
+                table: {
+                    width: ['*', '*', '*', '*', '*', '*', '*'],
+                    body: populateDoc(notify, rentalsDoc),
+                    alignment: 'center',
+                },
+                alignment: 'center'
+            },
+        ],
+        defaultStyle: {
+            font: 'Helvetica',
+            fontSize: 20,
+            alignment: 'justify'
+        }
+    }
+
+    const printer = new PdfPrinter(fonts);
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
+    res.setHeader("Content-Type", "application/pdf");
+    pdfDoc.pipe(res);
+    pdfDoc.end();
+})

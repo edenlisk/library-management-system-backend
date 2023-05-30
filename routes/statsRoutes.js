@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { generateNotificationReport } = require('../utils/generatePdf');
 const {
     weeklyStats,
     topBooks,
@@ -33,6 +34,9 @@ router.route('/notification')
 
 router.route('/total-revenue')
     .get(totalStats)
+
+router.route('/notification-report')
+    .post(generateNotificationReport);
 
 
 module.exports = router;
