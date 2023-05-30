@@ -637,8 +637,49 @@ exports.notification = catchAsync(async (req, res, next) => {
             // returned: false,
             // active: true
         }
-    );
-    const notify = [...teachersRentals, ...rentals];
+    ).populate('studentId')
+    const notify = [];
+    if (rentals) {
+        for (const rental of rentals) {
+            const { name, classIds } = rental.studentId;
+            const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
+            const {name:className} = await Class.findOne(filteredClass[0].classId);
+            const { _id, nameOfBook, author, bookId, categoryName, issueDate, dueDate, academicLevel } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                academicLevel,
+                categoryName,
+                rentalFor:name,
+                className,
+                model: 'student'
+            }
+            notify.push(rent);
+        }
+    }
+    if (teachersRentals) {
+        for (const rental of teachersRentals) {
+            const { _id, nameOfBook, author, bookId, rentalFor, categoryName, issueDate, dueDate, academicLevel } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                academicLevel,
+                categoryName,
+                rentalFor: rentalFor || null,
+                className: null,
+                model: 'teacher'
+            }
+            notify.push(rent);
+        }
+    }
     res
         .status(200)
         .json(
