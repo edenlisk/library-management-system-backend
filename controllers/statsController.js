@@ -624,8 +624,8 @@ exports.notification = catchAsync(async (req, res, next) => {
                 $gt: startDate,
                 $lte: notificationDate
             },
-            // returned: false,
-            // active: true
+            returned: false,
+            active: true
         }
     );
     const rentals = await Rental.find(
@@ -634,8 +634,8 @@ exports.notification = catchAsync(async (req, res, next) => {
                 $gt: startDate,
                 $lte: notificationDate
             },
-            // returned: false,
-            // active: true
+            returned: false,
+            active: true
         }
     ).populate('studentId')
     const notify = [];
@@ -685,6 +685,7 @@ exports.notification = catchAsync(async (req, res, next) => {
         .json(
             {
                 status: "Success",
+                result: notify.length,
                 data: {
                     notify
                 }
