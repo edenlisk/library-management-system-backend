@@ -614,17 +614,38 @@ exports.numberOfBooks = catchAsync(async (req, res, next) => {
 
 exports.notification = catchAsync(async (req, res, next) => {
     const today = new Date();
+    const currentDate = new Date();
+    const startDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1)).toISOString().split('T')[0];
     today.setDate(today.getDate() + 1);
     const notificationDate = new Date(new Date(today).toISOString().split('T')[0]);
-    const teachersRentals = await Rental.find({ dueDate: notificationDate, returned: false });
-    const rentals = await Rental.find({ dueDate: notificationDate, returned: false });
+    const teachersRentals = await Rental.find(
+        {
+            dueDate: {
+                $gt: startDate,
+                $lte: notificationDate
+            },
+            // returned: false,
+            // active: true
+        }
+    );
+    const rentals = await Rental.find(
+        {
+            dueDate: {
+                $gt: startDate,
+                $lte: notificationDate
+            },
+            // returned: false,
+            // active: true
+        }
+    );
+    const notify = [...teachersRentals, ...rentals];
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    rentals: { ...rentals, ...teachersRentals }
+                    notify
                 }
             }
         )
