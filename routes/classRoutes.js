@@ -15,8 +15,8 @@ const { getStudentsByClass } = require('../controllers/studentsController');
 const { protect } = require('../controllers/authController');
 const { generateClassReport } = require('../utils/generatePdf');
 
-router.route('/')
-    .get(getAllClasses)
+// router.route('/')
+//     .get(getAllClasses)
 
 router.route('/report/:classId')
     .post(generateClassReport)
