@@ -5,7 +5,7 @@ const Student = require('../modals/studentsModal');
 exports.overDueRentalsCronJob = () => {
     const task = cron.schedule('0 0 * * *', async () => {
         try {
-            const overdueRentals = await Rental.find({ returned: false, returnDate: undefined, active: true });
+            const overdueRentals = await Rental.find({ returned: false, returnDate: null, active: true });
             // Calculate and update fines for each student
             if (overdueRentals) {
                 for (const rental of overdueRentals) {
@@ -25,7 +25,7 @@ exports.overDueRentalsCronJob = () => {
 exports.inactiveRentalsCronJob = () => {
     const task = cron.schedule('0 0 * * *', async () => {
         try {
-            const inactiveRentals = await Rental.find({active: false, returned: false, nextActiveDate: !undefined});
+            const inactiveRentals = await Rental.find({active: false, returned: false});
             if (inactiveRentals) {
                 for (const inactiveRental of inactiveRentals) {
                     let { studentId, nextActiveDate } = inactiveRental;

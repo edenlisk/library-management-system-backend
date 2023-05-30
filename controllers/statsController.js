@@ -616,14 +616,15 @@ exports.notification = catchAsync(async (req, res, next) => {
     const today = new Date();
     today.setDate(today.getDate() + 1);
     const notificationDate = new Date(new Date(today).toISOString().split('T')[0]);
-    const rentals = await Rental.find({ dueDate: notificationDate });
+    const teachersRentals = await Rental.find({ dueDate: notificationDate, returned: false });
+    const rentals = await Rental.find({ dueDate: notificationDate, returned: false });
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    rentals
+                    rentals: { ...rentals, ...teachersRentals }
                 }
             }
         )
