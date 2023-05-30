@@ -26,6 +26,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const booksRoutes = require('./routes/booksRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 // const reportsRouter = require('./routes/reportsRoutes');
 
 const app = express();
@@ -85,6 +86,7 @@ app.use('/api/v1/academic-year', academicYearRouter);
 app.use('/api/v1/statistics', statsRoutes);
 app.use('/api/v1/books', booksRoutes);
 app.use('/api/v1/book-category', categoryRoutes);
+app.use('/api/v1/settings', settingsRoutes);
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`));
 })

@@ -39,7 +39,25 @@ exports.createTeacherRental = catchAsync(async (req, res, next) => {
     if (!book) return next(new AppError("This book does not exist!", 400));
     const { bookName, _id, author, academicLevel, categoryName, language } = book;
     const { bookIds } = req.body;
-    for (const bookId of bookIds) {
+    if (Array.isArray(bookIds)) {
+        for (const bookId of bookIds) {
+            await TeachersRental.create(
+                {
+                    nameOfBook: bookName,
+                    author,
+                    academicLevel,
+                    language,
+                    categoryName,
+                    book_id: _id,
+                    bookId: bookId,
+                    teacherId: req.body.teacherId,
+                    issueDate: req.body.issueDate,
+                    dueDate: req.body.dueDate,
+                    rentalFor: req.body.rentalFor
+                }
+            )
+        }
+    } else {
         await TeachersRental.create(
             {
                 nameOfBook: bookName,
@@ -48,7 +66,7 @@ exports.createTeacherRental = catchAsync(async (req, res, next) => {
                 language,
                 categoryName,
                 book_id: _id,
-                bookId: bookId,
+                bookId: bookIds,
                 teacherId: req.body.teacherId,
                 issueDate: req.body.issueDate,
                 dueDate: req.body.dueDate,
@@ -56,6 +74,7 @@ exports.createTeacherRental = catchAsync(async (req, res, next) => {
             }
         )
     }
+
 
     res
         .status(201)
