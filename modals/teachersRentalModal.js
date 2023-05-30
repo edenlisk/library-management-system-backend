@@ -39,7 +39,7 @@ const teachersRentalSchema = new mongoose.Schema(
         },
         active: {
           type: Boolean,
-          default: true
+          default: () => false
         },
         rentalFor: {
             type: String,
@@ -53,7 +53,7 @@ const teachersRentalSchema = new mongoose.Schema(
         },
         returned: {
             type: Boolean,
-            default: false
+            default: () => false
         }
     }
 )
@@ -79,7 +79,7 @@ teachersRentalSchema.pre('save', async function (next) {
                 {$inc: {availableCopy: 1}},
                 {new: true}
             )
-            this.active = undefined;
+            this.active = null;
         }
     }
     next();

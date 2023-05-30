@@ -8,7 +8,7 @@ const {
     numberOfBooks,
     notification,
     numberOfRentalsByCategory,
-    totalRevenue} = require('../controllers/statsController');
+    totalStats } = require('../controllers/statsController');
 
 router.route('/top-students/:academicYear')
     .get(topStudents)
@@ -32,7 +32,7 @@ router.route('/notification')
     .get(notification)
 
 router.route('/total-revenue')
-    .get(totalRevenue)
+    .get(totalStats)
 
 
 module.exports = router;

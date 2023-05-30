@@ -1,5 +1,6 @@
 const Class = require('../modals/classModal');
 const Category = require('../modals/categoryModel');
+const TeachersRental = require('../modals/teachersRentalModal');
 const Student = require('../modals/studentsModal');
 const Rental = require('../modals/rentalsModal');
 const Book = require('../modals/bookModel');
@@ -629,7 +630,7 @@ exports.notification = catchAsync(async (req, res, next) => {
     ;
 })
 
-exports.totalRevenue = catchAsync(async (req, res, next) => {
+exports.totalStats = catchAsync(async (req, res, next) => {
     const revenues = await Student.aggregate(
         [
             {
@@ -648,16 +649,43 @@ exports.totalRevenue = catchAsync(async (req, res, next) => {
             }
         ]
     )
-    const revenue = revenues[0];
+    const books = await Book.aggregate(
+        [
+            {
+                $match: {}
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalBooks: {$sum: '$numberOfBooks'}
+                }
+            },
+            {
+                $project: {
+                    _id: 0
+                }
+            }
+        ]
+    )
+    const lostBooks = await Rental.countDocuments({active: false, returned: false});
+    const issuedBooksStudents = await Rental.countDocuments({returned: false});
+    const issuedBooksTeachers = await TeachersRental.countDocuments({returned: false})
+    const issuedBooks = issuedBooksStudents + issuedBooksTeachers;
+    // const revenue = revenues[0];
     res
         .status(200)
         .json(
             {
                 status: "Success",
                 data: {
-                    revenue
+                    revenue: revenues[0].totalRevenue,
+                    books: books[0].totalBooks,
+                    issuedBooks,
+                    lostBooks
                 }
             }
         )
     ;
 })
+
+

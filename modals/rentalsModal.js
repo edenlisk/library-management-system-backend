@@ -45,7 +45,7 @@ const rentalSchema = new mongoose.Schema(
         categoryName: String,
         returned: {
             type: Boolean,
-            default: false
+            default: () => false
         },
         language: {
           type: String
@@ -56,7 +56,7 @@ const rentalSchema = new mongoose.Schema(
         },
         active: {
             type: Boolean,
-            default: true
+            default: () => true
         },
         nextActiveDate: {
             type: Date
@@ -91,11 +91,11 @@ rentalSchema.pre('save', async function(next) {
                 {$inc: {availableCopy: 1}},
                 {new: true}
             )
-            this.active = undefined;
-            this.nextActiveDate = undefined;
+            this.active = null;
+            this.nextActiveDate = null;
         }
     }
-    if (this.isModified('active') && !this.isNew) {
+    if (this.isModified('active') && !this.isModified('returned') && !this.isNew) {
         if (this.active === false && this.returned === false) {
             const today = new Date();
             today.setDate(today.getDate() + 90);
