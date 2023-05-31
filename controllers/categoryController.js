@@ -14,6 +14,7 @@ exports.getAllCategories = catchAsync(async (req, res, next) => {
                 }
             }
         )
+        .select({books: 0})
     ;
 
     res

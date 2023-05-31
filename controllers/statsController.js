@@ -244,7 +244,69 @@ exports.numberOfRentalsByCategory = catchAsync(async (req, res, next) => {
                 }
             ]
     }
-    const levels = {"s1": "Senior One", "s2": "Senior Two", "s3": "Senior Three", "s4": "Senior Four", "s5": "Senior Five", "s6": "Senior Six", "other": "Other"}
+    const levels = {"s1": "Senior One", "s2": "Senior Two", "s3": "Senior Three", "s4": "Senior Four", "s5": "Senior Five", "s6": "Senior Six"}
+    const categories = [
+        {
+            "x": "mathematics",
+            "y": 0
+        },
+        {
+            "x": "computer science",
+            "y": 0
+        },
+        {
+            "x": "english",
+            "y": 0
+        },
+        {
+            "x": "biology",
+            "y": 0
+        },
+        {
+            "x": "history",
+            "y": 0
+        },
+        {
+            "x": "novel",
+            "y": 0
+        },
+        {
+            "x": "geography",
+            "y": 0
+        },
+        {
+            "x": "kinyarwanda",
+            "y": 0
+        },
+        {
+            "x": "french",
+            "y": 0
+        },
+        {
+            "x": "swahili",
+            "y": 0
+        },
+        {
+            "x": "general studies",
+            "y": 0
+        },
+        {
+            "x": "entrepr",
+            "y": 0
+        },
+        {
+            "x": "chemistry",
+            "y": 0
+        },
+        {
+            "x": "economics",
+            "y": 0
+        },
+        {
+            "x": "other",
+            "y": 0
+        },
+    ]
     let result = {};
     const sortResult = (data) => {
         data.forEach(datum => {
@@ -255,21 +317,27 @@ exports.numberOfRentalsByCategory = catchAsync(async (req, res, next) => {
     const resultIds = Object.keys(result);
     const numberOfRentalsByCategory = [];
     resultIds.forEach(id => {
-        let data = [];
-        result[id].forEach(elem => {
-            const item = {
-                x: elem.categoryName,
-                y: elem.rentalCount
+        if (id !== "other") {
+            let data = [];
+            result[id].forEach(elem => {
+                const item = {
+                    x: elem.categoryName,
+                    y: elem.rentalCount
+                }
+                data.push(item)
+            })
+            categories.forEach(category => {
+                if (!data.some(item => item.x === category.x)) {
+                    data.push(category)
+                }
+            })
+            const record = {
+                "id": levels[id],
+                data
             }
-            data.push(item)
-        })
-        const record = {
-            "id": levels[id],
-            data
+            numberOfRentalsByCategory.push(record)
         }
-        numberOfRentalsByCategory.push(record)
     })
-
 
 
     res
@@ -282,6 +350,7 @@ exports.numberOfRentalsByCategory = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 })
 
 exports.topStudents = catchAsync(async (req, res, next) => {
