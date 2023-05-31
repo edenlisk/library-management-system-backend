@@ -106,8 +106,8 @@ exports.lastCreatedRentals = catchAsync(async (req, res, next) => {
     const rawRentals = await Rental.find().sort('-CreatedAt').select({nameOfBook: 1, bookId: 1, category: 1, issueDate: 1, studentId: 1}).limit(10).populate({path: 'studentId'});
     const rentals = [];
     rawRentals.forEach(rent => {
-        const { nameOfBook, category, issueDate, bookId, studentId } = rent;
-        rentals.push({bookId, nameOfBook, category, studentName: studentId.name , issueDate: issueDate.toISOString().split('T')[0]});
+        const { nameOfBook, categoryName, issueDate, bookId, studentId, dueDate } = rent;
+        rentals.push({bookId, nameOfBook, categoryName, studentName: studentId.name , dueDate: dueDate.toISOString().split('T')[0], issueDate: issueDate.toISOString().split('T')[0]});
     })
     res
         .status(200)

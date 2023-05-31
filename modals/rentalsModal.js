@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const AppError = require('../utils/appError');
 const Book = require('../modals/bookModel');
+const Settings = require('../modals/settingsModel');
 
 const rentalSchema = new mongoose.Schema(
     {
@@ -97,8 +98,9 @@ rentalSchema.pre('save', async function(next) {
     }
     if (this.isModified('active') && !this.isModified('returned') && !this.isNew) {
         if (this.active === false && this.returned === false) {
+            const settings = await Settings.findOne().limit(1);
             const today = new Date();
-            today.setDate(today.getDate() + 90);
+            today.setDate(today.getDate() + settings.inactivityDays);
             this.nextActiveDate = new Date(today).toISOString().split('T')[0];
         }
     }
