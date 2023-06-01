@@ -2,6 +2,7 @@ const PdfPrinter = require('pdfmake');
 const Class = require('../modals/classModal');
 const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
+const TeachersRentals = require('../modals/teachersRentalModal');
 const catchAsync = require('./catchAsync');
 const AppError = require('./appError');
 
@@ -193,14 +194,14 @@ exports.generateNotificationReport = catchAsync(async (req, res, next) => {
     const startDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1)).toISOString().split('T')[0];
     today.setDate(today.getDate() + 1);
     const notificationDate = new Date(new Date(today).toISOString().split('T')[0]);
-    const teachersRentals = await Rental.find(
+    const teachersRentals = await TeachersRentals.find(
         {
             dueDate: {
                 $gt: startDate,
                 $lte: notificationDate
             },
-            // returned: false,
-            // active: true
+            returned: false,
+            active: true
         }
     );
     const rentals = await Rental.find(
@@ -209,8 +210,8 @@ exports.generateNotificationReport = catchAsync(async (req, res, next) => {
                 $gt: startDate,
                 $lte: notificationDate
             },
-            // returned: false,
-            // active: true
+            returned: false,
+            active: true
         }
     ).populate('studentId')
     const notify = [];
