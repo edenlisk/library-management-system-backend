@@ -11,6 +11,9 @@ router.route('/')
 router.route('/signup')
     .post(signup)
 
+router.route('/delete/:librarianId')
+    .delete(deleteLibrarian)
+
 router.route('/login')
     .post(login)
 
@@ -26,6 +29,5 @@ router.route('/resetPassword/:token')
 router.route('/:librarianId')
     .get(getLibrarian)
     .patch(uploadProfilePhoto, updateLibrarian)
-    .delete( deleteLibrarian)
 
 module.exports = router;

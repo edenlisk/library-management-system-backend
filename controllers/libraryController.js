@@ -50,9 +50,13 @@ exports.getLibrarian = catchAsync(async (req, res, next) => {
 
 exports.updateLibrarian = catchAsync(async (req, res, next) => {
     const librarian = await LibraryController.findById(req.params.librarianId);
+    if (!librarian) return next(new AppError("Librarian does not exists", 400));
     if (req.body.name) librarian.name = req.body.name;
     if (req.body.role) librarian.role = req.body.role;
     if (req.body.username) librarian.username = req.body.username;
+    if (req.body.password) librarian.password = req.body.password;
+    if (req.body.passwordConfirm) librarian.passwordConfirm = req.body.passwordConfirm;
+    if (req.body.active) librarian.active = req.body.active;
     if (req.file) librarian.profileImage = req.file.filename;
     await librarian.save({validateModifiedOnly: true});
     res

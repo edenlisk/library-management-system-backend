@@ -43,6 +43,10 @@ const librarianSchema = new mongoose.Schema(
                 message: "Passwords does not match"
             }
         },
+        active: {
+          type: Boolean,
+          default: () => true
+        },
         passwordChangedAt: Date,
         passwordResetToken: String,
         passwordResetExpires: Date,
