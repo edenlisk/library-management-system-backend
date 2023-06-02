@@ -4,9 +4,8 @@ const AppError = require('../utils/appError');
 const multer = require('multer');
 
 
-
 exports.getAllLibrarians = catchAsync(async (req, res, next) => {
-    const librarians = await LibraryController.find();
+    const librarians = await LibraryController.find().select({name: 1, role: 1, username: 1, email: 1, active: 1})
     res
         .status(200)
         .json(
@@ -65,9 +64,6 @@ exports.updateLibrarian = catchAsync(async (req, res, next) => {
         .json(
             {
                 status: "Success",
-                data: {
-                    librarian
-                }
             }
         )
     ;
