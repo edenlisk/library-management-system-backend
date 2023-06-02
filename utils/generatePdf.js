@@ -264,6 +264,7 @@ exports.generateNotificationReport = catchAsync(async (req, res, next) => {
         [
             {text: '#', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
             {text: 'Borrower', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
+            {text: 'Class', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
             {text: 'Book Id', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
             {text: 'Name of book', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
             {text: 'Issue date', fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
