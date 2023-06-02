@@ -33,6 +33,7 @@ exports.createBook = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteBook = catchAsync(async (req, res, next) => {
+    if (!req.params.bookId) return next(new AppError("Please provide bookId to delete", 401));
     const deletedBook = await Book.findOneAndDelete({_id: req.params.bookId});
     if (!deletedBook) return next(new AppError("Book no longer exists!", 400));
     res
@@ -101,12 +102,12 @@ exports.getBook = catchAsync(async (req, res, next) => {
 
 exports.importBooks = catchAsync(async (req, res, next) => {
     const books = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
-    if (!next) return next(new AppError("No data found in file uploaded", 400));
+    if (!books) return next(new AppError("No data found in file uploaded", 400));
     for (const book of books) {
         book.numberOfBooks = parseInt(book.numberOfBooks);
-        const category = await Category.findOne({categoryName: book.categoryName});
+        const category = await Category.findOne({categoryName: book.categoryName.trim()});
         if (category) {
-            const bk = await Book.findOne({bookName: book.bookName, academicLevel: book.academicLevel});
+            const bk = await Book.findOne({bookName: book.bookName.trim(), academicLevel: book.academicLevel.trim()});
             if (!bk) {
                 await Book.create(book);
             }

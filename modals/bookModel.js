@@ -85,6 +85,11 @@ bookSchema.pre('save', async function (next) {
             this.availableCopy -= parseInt(numberOfBooks) - parseInt(this.numberOfBooks);
         }
     }
+    this.bookName = this.bookName.trim();
+    this.edition = this.edition.trim();
+    this.author = this.author.trim();
+    this.categoryName = this.categoryName.trim();
+    this.language = this.language.trim();
     next();
 })
 

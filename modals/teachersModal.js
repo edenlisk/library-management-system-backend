@@ -5,13 +5,25 @@ const teacherSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: [true, "Teacher must have a name"]
+            required: [true, "Teacher must have a name"],
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.text(elem)
+                },
+                message: "Invalid name, can't contain special characters"
+            }
         },
         registrationNumber: {
             type: String,
             unique: true,
             required: [true, "Teacher must have registration number"],
-            immutable: true
+            immutable: true,
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z0-9]+$/.test(elem)
+                },
+                message: "Invalid registration number, it can't contain spaces and special characters"
+            }
         },
         rentals: {
             type: [

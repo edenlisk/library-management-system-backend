@@ -88,10 +88,13 @@ exports.deleteStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.createStudent = catchAsync(async (req, res, next) => {
+    const isRegValid = /^[a-zA-Z0-9]+$/.text(req.body.registrationNumber);
+    if (isRegValid !== true) return next(new AppError("Invalid Registration number, It can't contain special characters and spaces", 401));
+
     const student = await Student.findOne({$and: [{registrationNumber: req.body.registrationNumber.trim()}]});
-    const targetClass = await Class.findOne({_id: req.params.classId, academicYear: req.params.academicYear});
+    const targetClass = await Class.findOne({_id: req.params.classId, academicYear: req.params.academicYear.trim()});
     const checkExisting = (data) => {
-        return data.some(obj => obj.academicYear === targetClass.academicYear)
+        return data.some(obj => obj.academicYear === targetClass.academicYear.trim())
     }
     if (student) {
         if (!targetClass) {
@@ -101,8 +104,8 @@ exports.createStudent = catchAsync(async (req, res, next) => {
             if (targetClass.students.includes(student._id) || checkExisting(student.classIds)) {
                 return next(new AppError(`There is already a student with this registration number`, 400));
             } else {
-                student.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
-                student.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
+                student.classIds.push({academicYear: targetClass.academicYear.trim(), classId: targetClass._id});
+                student.rentals.push({academicYear: targetClass.academicYear.trim(), rentalHistory: []});
                 targetClass.students.push(student._id);
                 await student.save({validateModifiedOnly: true});
                 await targetClass.save({validateModifiedOnly: true});
@@ -218,13 +221,13 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
     //         }
     //     }
     // ]
-    const students = await Student.find({classIds: {$elemMatch: {classId: req.params.classId}}, rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
+    const students = await Student.find({classIds: {$elemMatch: {classId: req.params.classId}}, rentals: {$elemMatch: {academicYear: req.params.academicYear.params}}});
     // console.log(students);
     const result = [];
     students.forEach(stu => {
         if (stu.rentals) {
             stu.rentals.forEach(rent => {
-                if (rent.academicYear === req.params.academicYear) {
+                if (rent.academicYear === req.params.academicYear.trim()) {
                     const {_id, name, registrationNumber, fine} = stu;
                     const std = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
                     result.push(std);
@@ -250,16 +253,21 @@ exports.importStudents = catchAsync(async (req, res, next) => {
     const checkExisting = (data) => {
         return data.some(obj => obj.academicYear === targetClass.academicYear)
     }
+    const report = [];
     if (!targetClass) {
         return next(new AppError("Class does not exists", 401));
     } else {
         const students = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!students) return next(new AppError("No data found in this file", 400));
         for (let i = 0; i < students.length; i++) {
+            const rep = {};
+            rep.name = students[i].name;
             const student = await Student.findOne({registrationNumber: students[i].registrationNumber});
             if (student) {
                 if (targetClass.students.includes(student._id) || checkExisting(student.classIds)) {
-                    console.log('student is already in this class or he belongs in another class');
+                    rep.issues = `belongs in this class or other class`;
+                    rep.status = 'Not added';
+                    report.push(rep);
                     // continue
                     // students.splice(i, 1);
                 } else {
@@ -268,28 +276,41 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                     student.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
                     await student.save({validateModifiedOnly: true});
                     await targetClass.save({validateModifiedOnly: true});
+                    rep.issues = ``;
+                    rep.status = "added successfully";
+                    report.push(rep);
                     // students.splice(i, 1);
                 }
             } else {
-                await Student.create(
-                    {
-                        name: students[i].name,
-                        academicYear: targetClass.academicYear,
-                        currentClassId: targetClass._id,
-                        rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}],
-                        registrationNumber: students[i].registrationNumber
-                    }
-                )
+                const isRegValid = /^[a-zA-Z0-9]+$/.test(students[i].registrationNumber);
+                if (isRegValid !== true) {
+                    rep.issues = `Invalid registration number, it can't contain special characters and spaces`;
+                    rep.status = "Not added";
+                    report.push(rep);
+                } else {
+                    await Student.create(
+                        {
+                            name: students[i].name,
+                            academicYear: targetClass.academicYear,
+                            currentClassId: targetClass._id,
+                            rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}],
+                            registrationNumber: students[i].registrationNumber
+                        }
+                    )
+                    rep.issues = ``;
+                    rep.status = 'added successfully';
+                    report.push(rep);
+                }
             }
         }
-        const newClass = await Class.findOne({_id: req.params.classId});
+        // const newClass = await Class.findOne({_id: req.params.classId});
         res
             .status(200)
             .json(
                 {
                     status: "Success",
                     data: {
-                        newClass
+                        report
                     }
                 }
             )

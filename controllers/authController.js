@@ -61,7 +61,7 @@ exports.login = catchAsync(async (req, res, next) => {
         return next(new AppError("Please provide email and password", 400));
     }
 
-    const librarian = await LibrarianModal.findOne({email: email}).select("+password");
+    const librarian = await LibrarianModal.findOne({email: email.trim()}).select("+password");
     if (!librarian || !(await librarian.verifyPassword(password))) {
         return next(new AppError("Invalid Email or Password"), 401);
     }
@@ -120,7 +120,7 @@ exports.restrictTo = (...roles) => {
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 1. Check if user with POSTed email exists
-    const currentUser = await LibrarianModal.findOne({email: req.body.email});
+    const currentUser = await LibrarianModal.findOne({email: req.body.email.trim()});
     if (!currentUser) return next(new AppError("There is not user with this email", 404));
     // 2. Generate random token
     const resetToken = await currentUser.createPasswordResetToken();

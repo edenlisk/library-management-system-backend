@@ -7,7 +7,13 @@ const librarianSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: [true, "A Librarian must have a name"]
+            required: [true, "A Librarian must have a name"],
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.text(elem)
+                },
+                message: "Invalid name, can't contain special characters"
+            }
         },
         email: {
             type: String,
@@ -20,7 +26,13 @@ const librarianSchema = new mongoose.Schema(
             required: [true, "A Librarian must have username"],
             minLength: 5,
             maxLength: 20,
-            unique: true
+            unique: true,
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z0-9]+$/.text(elem)
+                },
+                message: "invalid username, can't contain spaces and special characters"
+            }
         },
         role: {
             type: String,

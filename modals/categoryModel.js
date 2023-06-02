@@ -6,7 +6,13 @@ const categorySchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
-            lowercase: true
+            lowercase: true,
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.text(elem)
+                },
+                message: "Invalid name, can't contain special characters"
+            }
         },
         books: {
             type: [

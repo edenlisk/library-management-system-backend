@@ -70,7 +70,7 @@ exports.updateClass = catchAsync(async (req, res, next) => {
     const updatedClass = await Class.findById(req.params.classId);
     if (req.body.name) updatedClass.name = req.body.name;
     if (req.body.category) updatedClass.category = req.body.category;
-    await updatedClass.save();
+    await updatedClass.save({validateModifiedOnly: true});
     res
         .status(200)
         .json(
@@ -148,6 +148,9 @@ exports.getClassesByAcademicYear = catchAsync(async (req, res, next) => {
 })
 
 exports.importClasses = catchAsync(async (req, res, next) => {
+    if (/^\d{4}-\d{4}$/.test(req.params.academicYear) !== true) {
+        return next(new AppError("Invalid academic year, It must be in this format YYYY-YYYY", 400));
+    }
     const schoolYear = await AcademicYear.findOne({academicYear: req.params.academicYear});
     if (!schoolYear) {
         next(new AppError("Academic Year does not exists"))

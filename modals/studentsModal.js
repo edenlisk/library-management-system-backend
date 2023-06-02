@@ -9,7 +9,13 @@ const studentSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: [true, 'Student must have a name']
+            required: [true, 'Student must have a name'],
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(elem)
+                },
+                message: "Invalid name, can't contain special characters"
+            }
         },
         academicYear: {
             type: String,
@@ -59,7 +65,13 @@ const studentSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Student must have registration number'],
             unique: true,
-            immutable: true
+            immutable: true,
+            validate: {
+                validator: (elem) => {
+                    return /^[a-zA-Z0-9]+$/.test(elem)
+                },
+                message: "Invalid registration number, it can't contain spaces and special characters"
+            }
         },
         fine: {
             type: Number,
@@ -87,10 +99,10 @@ studentSchema.methods.removeStudent = async function (req) {
     // await Class.updateMany({ students: _conditions._id }, { $pull: { students: _conditions._id }});
     // await Rental.deleteMany({ studentId: _conditions._id });
     await Class.updateOne(
-        {_id: req.params.classId, students: req.params.studentId, academicYear: req.params.academicYear},
+        {_id: req.params.classId, students: req.params.studentId, academicYear: req.params.academicYear.trim()},
         {$pull: {students: req.params.studentId}}
     )
-    const rentals = await Rental.find({studentId: req.params.studentId, academicYear: req.params.academicYear});
+    const rentals = await Rental.find({studentId: req.params.studentId, academicYear: req.params.academicYear.trim()});
     if (rentals) {
         for (const rental of rentals) {
             const { book_id } = rental;
@@ -99,7 +111,7 @@ studentSchema.methods.removeStudent = async function (req) {
     }
 
     await Rental.deleteMany(
-        {studentId: req.params.studentId, academicYear: req.params.academicYear}
+        {studentId: req.params.studentId, academicYear: req.params.academicYear.trim()}
     )
     const student = this;
     student.classIds.forEach((cls, index) => {
@@ -120,7 +132,7 @@ studentSchema.methods.removeStudent = async function (req) {
 studentSchema.pre('save', async function(next) {
     if (this.isNew) {
         const targetClass = await Class.updateOne(
-            { _id: this.currentClassId, academicYear: this.academicYear },
+            { _id: this.currentClassId, academicYear: this.academicYear.trim() },
             { $push: { students: this._id } },
             { new: true, runValidators: true }
         )
