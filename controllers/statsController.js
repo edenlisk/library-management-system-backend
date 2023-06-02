@@ -103,7 +103,7 @@ exports.numRentalsPerStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.lastCreatedRentals = catchAsync(async (req, res, next) => {
-    const rawRentals = await Rental.find().sort('-CreatedAt').select({nameOfBook: 1, bookId: 1, categoryName: 1, issueDate: 1, studentId: 1, dueDate: 1}).limit(10).populate({path: 'studentId'});
+    const rawRentals = await Rental.find({}).sort('-createdAt').select({nameOfBook: 1, bookId: 1, categoryName: 1, issueDate: 1, studentId: 1, dueDate: 1, createdAt: 1}).limit(10).populate({path: 'studentId'});
     const rentals = [];
     if (rawRentals) {
         rawRentals.forEach(rent => {
