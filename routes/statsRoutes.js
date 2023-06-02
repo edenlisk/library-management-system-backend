@@ -9,7 +9,8 @@ const {
     numberOfBooks,
     notification,
     numberOfRentalsByCategory,
-    totalStats } = require('../controllers/statsController');
+    totalStats,
+    allRentals } = require('../controllers/statsController');
 
 router.route('/top-students/:academicYear')
     .get(topStudents)
@@ -31,6 +32,9 @@ router.route('/top-books')
 
 router.route('/notification')
     .get(notification)
+
+router.route('/all-rentals')
+    .get(allRentals);
 
 router.route('/total-revenue')
     .get(totalStats)

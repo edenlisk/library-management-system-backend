@@ -837,4 +837,64 @@ exports.totalStats = catchAsync(async (req, res, next) => {
     ;
 })
 
+exports.allRentals = catchAsync(async (req, res, next) => {
+    const studentsRentals = await Rental.find({returned: false}).populate('studentId');
+    const teachersRentals = await TeachersRental.find({returned: false}).populate('teacherId');
+    const allRentals = [];
+    if (studentsRentals) {
+        for (const rental of studentsRentals) {
+            const { name, classIds } = rental.studentId;
+            const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
+            const {name:className} = await Class.findOne(filteredClass[0].classId);
+            const { _id, nameOfBook, author, bookId, categoryName, issueDate, dueDate, academicLevel } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                academicLevel,
+                categoryName,
+                rentalFor:name,
+                className,
+                model: 'student'
+            }
+            allRentals.push(rent);
+        }
+    }
+    if (teachersRentals) {
+        for (const rental of teachersRentals) {
+            const {name} = rental.teacherId;
+            const { _id, nameOfBook, author, bookId, rentalFor, categoryName, issueDate, dueDate, academicLevel } = rental;
+            const rent = {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                academicLevel,
+                categoryName,
+                rentalFor: rentalFor ? rentalFor : name,
+                className: null,
+                model: 'teacher'
+            }
+            allRentals.push(rent);
+        }
+    }
+
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    allRentals
+                }
+            }
+        )
+    ;
+})
+
 
