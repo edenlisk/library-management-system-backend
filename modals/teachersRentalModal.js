@@ -27,6 +27,9 @@ const teachersRentalSchema = new mongoose.Schema(
             type: Date,
             required: [true, 'Please provide due date of rental']
         },
+        categoryName: {
+            type: String
+        },
         returnDate: {
           type: Date,
           default: () => null
