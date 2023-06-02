@@ -57,7 +57,6 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
         }
     );
     if (!students) return next(new AppError("This class has no students", 400));
-    const rentalsData = [[{text: "Name of book"}, {text: 'returned'}]];
     const populateRentals = (rentalsInfo, rentalsData) => {
         rentalsInfo.forEach(rental => {
             rentalsData.push([{text: rental.nameOfBook.charAt(0).toUpperCase() + rental.nameOfBook.slice(1)}, {text: rental.returned}])
@@ -69,12 +68,16 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
             {text: "student name", margin: [0, 5, 0, 2], fillColor: '#93c6e8'},
             {text: 'reg number', margin: [0, 5, 0, 2], fillColor: '#93c6e8'},
             {text: 'rentals', margin: [0, 5, 0, 2], fillColor: '#93c6e8'},
-            {text: "penalty fee (RWF)", margin: [0, 5, 0, 2], fillColor: '#93c6e8'}
+            {text: "fine", margin: [0, 5, 0, 2], fillColor: '#93c6e8'}
         ]
     ];
+
     const populatedDoc = (studentsData, tableData) => {
         studentsData.forEach(student => {
             student.rentals = student.rentals.filter(rent => rent.academicYear === targetClass.academicYear)
+
+            const rentalsData = [[{text: "Name of book"}, {text: 'returned'}]];
+
             tableData.push(
                 [
                     {text: student.name, alignment: 'left' , margin: [0, 5, 0, 2]},
@@ -91,6 +94,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
         })
         return tableData;
     }
+
 
     const docDefinition = {
         pageOrientation: 'landscape',
