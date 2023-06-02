@@ -65,7 +65,7 @@ exports.login = catchAsync(async (req, res, next) => {
     if (!librarian || !(await librarian.verifyPassword(password))) {
         return next(new AppError("Invalid Email or Password"), 401);
     }
-    if (librarian.active === false) return next(new AppError("Your Account is suspended, please contact admin to re-activate", 401));
+    if (librarian.active !== true) return next(new AppError("Your Account is suspended, please contact admin to re-activate", 401));
     librarian.password = undefined;
     createSendToken(librarian, 200, res);
 })
