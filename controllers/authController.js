@@ -65,8 +65,9 @@ exports.login = catchAsync(async (req, res, next) => {
     if (!librarian || !(await librarian.verifyPassword(password))) {
         return next(new AppError("Invalid Email or Password"), 401);
     }
+    if (librarian.active === false) return next(new AppError("Your Account is suspended, please contact admin to re-activate", 401));
     librarian.password = undefined;
-    createSendToken(librarian, 200, res)
+    createSendToken(librarian, 200, res);
 })
 
 exports.logout = catchAsync(async (req, res, next) => {
@@ -90,18 +91,20 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
     // VERIFICATION OF TOKEN
     if (!token) {
-        next(new AppError("You're not logged in, Please login"), 401);
+        return next(new AppError("You're not logged in, Please login"), 401);
     }
     // CHECK IF USER STILL EXISTS
     const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET_KEY);
     const currentLibrarian = await LibrarianModal.findById(decode.id);
     if (!currentLibrarian) {
-        next(new AppError("The token belonging to this librarian no longer exists"), 401);
+        return next(new AppError("The token belonging to this librarian no longer exists"), 401);
     }
     // CHECK IF USER HAVE CHANGED THE PASSWORD AFTER THE TOKEN WAS ISSUED
     if (currentLibrarian.changedPasswordAfter(decode.iat)) {
-        next(new AppError("The user recently changed password!, Please log in again"), 401);
+        return next(new AppError("The user recently changed password!, Please log in again"), 401);
     }
+    if (currentLibrarian.active === false) return next(new AppError("Your account is suspended, please contact admin to re-activate", 401));
+
     req.user = currentLibrarian;
     next()
 })

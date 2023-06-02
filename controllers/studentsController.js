@@ -88,7 +88,7 @@ exports.deleteStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.createStudent = catchAsync(async (req, res, next) => {
-    const student = await Student.findOne({$and: [{registrationNumber: req.body.registrationNumber}]});
+    const student = await Student.findOne({$and: [{registrationNumber: req.body.registrationNumber.trim()}]});
     const targetClass = await Class.findOne({_id: req.params.classId, academicYear: req.params.academicYear});
     const checkExisting = (data) => {
         return data.some(obj => obj.academicYear === targetClass.academicYear)
@@ -99,7 +99,7 @@ exports.createStudent = catchAsync(async (req, res, next) => {
         } else {
             // student.classIds.some(obj => obj.academicYear === targetClass.academicYear) ||
             if (targetClass.students.includes(student._id) || checkExisting(student.classIds)) {
-                next(new AppError(`${student.name} is already in this class or belongs in another class`, 400));
+                return next(new AppError(`There is already a student with this registration number`, 400));
             } else {
                 student.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
                 student.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
@@ -120,7 +120,7 @@ exports.createStudent = catchAsync(async (req, res, next) => {
             )
         ;
     } else {
-        if (!targetClass) next(new AppError("Class does not exists!", 400));
+        if (!targetClass) return  next(new AppError("Class does not exists!", 400));
         const newStudent = await Student.create(
             {
                 name: req.body.name,

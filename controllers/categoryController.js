@@ -4,17 +4,7 @@ const AppError = require('../utils/appError');
 
 
 exports.getAllCategories = catchAsync(async (req, res, next) => {
-    const categories = await Category.find()
-        .populate(
-            {
-                path: 'books',
-                populate: {
-                    path: 'books',
-                    model: 'Book'
-                }
-            }
-        )
-        .select({books: 0})
+    const categories = await Category.find().select({books: 0})
     ;
 
     res
