@@ -10,7 +10,7 @@ const librarianSchema = new mongoose.Schema(
             required: [true, "A Librarian must have a name"],
             validate: {
                 validator: (elem) => {
-                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.text(elem)
+                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(elem)
                 },
                 message: "Invalid name, can't contain special characters"
             }
@@ -29,7 +29,7 @@ const librarianSchema = new mongoose.Schema(
             unique: true,
             validate: {
                 validator: (elem) => {
-                    return /^[a-zA-Z0-9]+$/.text(elem)
+                    return /^[a-zA-Z0-9]+$/.test(elem)
                 },
                 message: "invalid username, can't contain spaces and special characters"
             }
