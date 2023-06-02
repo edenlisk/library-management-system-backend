@@ -221,13 +221,13 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
     //         }
     //     }
     // ]
-    const students = await Student.find({classIds: {$elemMatch: {classId: req.params.classId}}, rentals: {$elemMatch: {academicYear: req.params.academicYear.params}}});
+    const students = await Student.find({classIds: {$elemMatch: {classId: req.params.classId}}, rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
     // console.log(students);
     const result = [];
     students.forEach(stu => {
         if (stu.rentals) {
             stu.rentals.forEach(rent => {
-                if (rent.academicYear === req.params.academicYear.trim()) {
+                if (rent.academicYear === req.params.academicYear) {
                     const {_id, name, registrationNumber, fine} = stu;
                     const std = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
                     result.push(std);
