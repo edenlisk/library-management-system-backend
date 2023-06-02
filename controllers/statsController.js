@@ -624,32 +624,46 @@ exports.weeklyStats = catchAsync(async (req, res, next) => {
     startOfPreviousWeek.setDate(currentDate.getDate() - currentDay - 7); // Subtract the current day and add 6 more days
     const endOfPreviousWeek = new Date(startOfPreviousWeek);
     endOfPreviousWeek.setDate(startOfPreviousWeek.getDate() + 6); // Add 6 days to get the end of the week
-    const issuedRentals = await Rental.countDocuments(
+    const issuedRentalsStudents = await Rental.countDocuments(
         {
             issueDate: {
-                $gt: new Date(startOfPreviousWeek.toISOString().split('T')[0]),
-                $lt: new Date(endOfPreviousWeek.toISOString().split('T')[0])
+                $gt: startOfPreviousWeek.toISOString().split('T')[0],
+                $lt: endOfPreviousWeek.toISOString().split('T')[0]
             }
         }
     );
-    const returnedRentals = await Rental.countDocuments(
+    const returnedRentalsStudents = await Rental.countDocuments(
         {
             returnDate: {
-                $gt: new Date(startOfPreviousWeek.toISOString().split('T')[0]),
-                $lt: new Date(endOfPreviousWeek.toISOString().split('T')[0])
+                $gt: startOfPreviousWeek.toISOString().split('T')[0],
+                $lt: endOfPreviousWeek.toISOString().split('T')[0]
             }
         }
     )
+
+    const issuedRentalsTeachers = await TeachersRental.countDocuments({
+        issueDate: {
+            $gt: startOfPreviousWeek.toISOString().split('T')[0],
+            $lt: endOfPreviousWeek.toISOString().split('T')[0]
+        }
+    })
+    const returnedRentalsTeachers = await TeachersRental.countDocuments({
+        returnDate: {
+            $gt: startOfPreviousWeek.toISOString().split('T')[0],
+            $lt: endOfPreviousWeek.toISOString().split('T')[0]
+        }
+    })
+
     const response = [
         {
             "id": 'issued',
             "label": "Issued Books",
-            "value": issuedRentals || parseInt((Math.random() * 100).toString().split('.')[0])
+            "value": issuedRentalsStudents + issuedRentalsTeachers
         },
         {
             "id": 'returned',
             "label": 'Returned Books',
-            "value": returnedRentals || parseInt((Math.random() * 100).toString().split('.')[0])
+            "value": returnedRentalsStudents + returnedRentalsTeachers
         }
     ]
 
