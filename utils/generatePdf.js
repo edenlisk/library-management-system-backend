@@ -276,8 +276,9 @@ exports.generateNotificationReport = catchAsync(async (req, res, next) => {
             const color = index % 2 === 0 ? '#ffffff' : '#c0cdd4';
             output.push(
                 [
-                    {text: index, margin: [0, 5, 0, 2], fillColor: color},
+                    {text: index + 1, margin: [0, 5, 0, 2], fillColor: color},
                     {text: rent.rentalFor ? rent.rentalFor : rent.model.charAt(0).toUpperCase() + rent.model.slice(1), margin: [0, 5, 0, 2], fillColor: color},
+                    {text: rent.className, margin: [0, 5, 0, 2], fillColor: color},
                     {text: rent.bookId, margin: [0, 5, 0, 2], fillColor: color},
                     {text: rent.nameOfBook.charAt(0).toUpperCase() + rent.nameOfBook.slice(1), margin: [0, 5, 0, 2], fillColor: color},
                     {text: rent.issueDate, margin: [0, 5, 0, 2], fillColor: color},
