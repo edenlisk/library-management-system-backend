@@ -283,9 +283,14 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                 }
             } else {
                 const isRegValid = /^[a-zA-Z0-9]+$/.test(students[i].registrationNumber);
+                const isNameValid = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(students[i].name);
                 if (isRegValid !== true) {
                     rep.issues = `Invalid registration number, it can't contain special characters and spaces`;
                     rep.status = "Not added";
+                    report.push(rep);
+                } else if (isNameValid !== true) {
+                    rep.issues = `Invalid name, it can't contain special characters`;
+                    rep.status = "Not Added"
                     report.push(rep);
                 } else {
                     await Student.create(
