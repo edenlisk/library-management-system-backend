@@ -1,11 +1,11 @@
-const LibraryController = require('../modals/librarianModal');
+const LibrarianModel = require('../modals/librarianModal');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const multer = require('multer');
 
 
 exports.getAllLibrarians = catchAsync(async (req, res, next) => {
-    const librarians = await LibraryController.find().select({name: 1, role: 1, username: 1, email: 1, active: 1})
+    const librarians = await LibrarianModel.find().select({name: 1, role: 1, username: 1, email: 1, active: 1})
     res
         .status(200)
         .json(
@@ -21,7 +21,7 @@ exports.getAllLibrarians = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteLibrarian = catchAsync(async (req, res, next) => {
-    await LibraryController.findByIdAndDelete(req.params.librarianId);
+    await LibrarianModel.findByIdAndDelete(req.params.librarianId);
     res
         .status(204)
         .json(
@@ -33,7 +33,7 @@ exports.deleteLibrarian = catchAsync(async (req, res, next) => {
 })
 
 exports.getLibrarian = catchAsync(async (req, res, next) => {
-    const librarian = await LibraryController.findById(req.params.librarianId);
+    const librarian = await LibrarianModel.findById(req.params.librarianId);
     res
         .status(200)
         .json(
@@ -48,7 +48,7 @@ exports.getLibrarian = catchAsync(async (req, res, next) => {
 })
 
 exports.updateLibrarian = catchAsync(async (req, res, next) => {
-    const librarian = await LibraryController.findOne({_id: req.params.librarianId});
+    const librarian = await LibrarianModel.findOne({_id: req.params.librarianId});
     if (!librarian) return next(new AppError("Librarian does not exists", 400));
     if (req.body.name) librarian.name = req.body.name;
     if (req.body.role) librarian.role = req.body.role;

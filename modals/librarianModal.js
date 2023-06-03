@@ -35,9 +35,28 @@ const librarianSchema = new mongoose.Schema(
             }
         },
         role: {
-            type: String,
-            enum: ['librarian', 'super-admin'],
-            default: 'librarian'
+            type: Object,
+            // enum: ['librarian', 'super-admin'],
+            default: () =>  ({
+                students: {
+                    add: true,
+                    edit: true,
+                    delete: false
+                },
+                librarians: {
+                    add: false,
+                    edit: false,
+                    delete: false
+                },
+                settings: {
+                    edit: true
+                },
+                rentals: {
+                    add: true,
+                    edit: true,
+                    delete: true
+                }
+            })
         },
         password: {
             type: String,

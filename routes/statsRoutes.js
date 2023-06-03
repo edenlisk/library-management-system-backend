@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { generateNotificationReport } = require('../utils/generatePdf');
+const {restrictTo} = require('../controllers/authController');
 const {
     weeklyStats,
     topBooks,

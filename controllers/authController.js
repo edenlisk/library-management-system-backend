@@ -109,12 +109,21 @@ exports.protect = catchAsync(async (req, res, next) => {
     next()
 })
 // TODO 5: Error handling -> done
-exports.restrictTo = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            next(new AppError("You don't have permissions to perform this action"), 401);
+exports.restrictTo = (option, role) => {
+    return async (req, res, next) => {
+        // const librarian = await LibrarianModal.findOne({_id: "647b8ddb2909a231bfce9a4c"});
+        const {role:roles} = req.user;
+        if (roles && roles[option][role] === true) {
+            return next();
+        } else {
+            return next(new AppError("You don't have permissions to perform this action", 401));
         }
-        next();
+        // const {role} = req.user;
+        // console.log(role);
+
+        // if (!roles.includes(req.user.role)) {
+        //     next(new AppError("You don't have permissions to perform this action"), 401);
+        // }
     }
 }
 
