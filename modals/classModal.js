@@ -11,7 +11,7 @@ const classSchema = new mongoose.Schema(
             required: [true, 'Class must have a name'],
             validate: {
                 validator: (elem) => {
-                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.text(elem)
+                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(elem)
                 },
                 message: "Invalid name, can't contain special characters"
             }

@@ -42,7 +42,7 @@ const teachersRentalSchema = new mongoose.Schema(
         },
         active: {
           type: Boolean,
-          default: () => false
+          default: () => true
         },
         rentalFor: {
             type: String,
