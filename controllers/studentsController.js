@@ -88,7 +88,7 @@ exports.deleteStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.createStudent = catchAsync(async (req, res, next) => {
-    const isRegValid = /^[a-zA-Z0-9]+$/.text(req.body.registrationNumber);
+    const isRegValid = /^[a-zA-Z0-9]+$/.test(req.body.registrationNumber);
     if (isRegValid !== true) return next(new AppError("Invalid Registration number, It can't contain special characters and spaces", 401));
 
     const student = await Student.findOne({$and: [{registrationNumber: req.body.registrationNumber.trim()}]});
