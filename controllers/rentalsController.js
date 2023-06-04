@@ -151,9 +151,9 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.inactiveRentals = catchAsync(async (req, res, next) => {
-    const rawRentals = await Rental.find({active: false})
+    const rawRentals = await Rental.find({active: false, returned: false})
             .populate('studentId');
-    const rawTeachersRentals = await TeachersRental.find({});
+    const rawTeachersRentals = await TeachersRental.find({active: false, returned: false});
     const rentals = [];
     if (rawRentals) {
         for (const rental of rawRentals) {
@@ -166,8 +166,8 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 nameOfBook,
                 author,
                 bookId,
-                issueDate,
-                dueDate,
+                issueDate: issueDate.toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
                 academicLevel,
                 categoryName,
                 language,

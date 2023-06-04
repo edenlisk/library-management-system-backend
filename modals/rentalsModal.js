@@ -110,7 +110,7 @@ rentalSchema.pre('save', async function(next) {
 rentalSchema.pre('deleteOne', async function(next) {
     const studentsModal = require('../modals/studentsModal');
     const { _conditions } = this;
-    const rental = await rentalModal.findOne(_conditions);
+    const rental = await rentalModal.findOne({_id: _conditions._id});
     const studentId = rental.studentId;
     if (!studentId) return next(new AppError("Rental does not exits!", 400));
     if (rental.returned === false) return next(new AppError("Rental cannot be deleted while not returned", 400));
