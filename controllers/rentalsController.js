@@ -32,7 +32,7 @@ exports.getAllRentals = catchAsync(async (req, res, next) => {
 exports.createRental = catchAsync(async (req, res, next) => {
     const book = await Book.findOne({_id: req.body.book_id});
     if (!book) return next(new AppError("This Book does not exist!", 400));
-    const { bookName, _id, author, academicLevel, categoryName, language } = book;
+    const { bookName, _id, author, academicLevel, categoryName, language, availableCopy } = book;
     const student = await Rental.findOne({studentId: req.params.studentId, book_id: _id, returned: false});
     if (student) return next(new AppError("Student already has this book", 400));
     const newRental = new Rental(

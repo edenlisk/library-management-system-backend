@@ -37,7 +37,7 @@ exports.getTeacherRental = catchAsync(async (req, res, next) => {
 exports.createTeacherRental = catchAsync(async (req, res, next) => {
     const book = await Book.findOne({_id: req.body.book_id});
     if (!book) return next(new AppError("This book does not exist!", 400));
-    const { bookName, _id, author, academicLevel, categoryName, language } = book;
+    const { bookName, _id, author, academicLevel, categoryName, language, availableCopy } = book;
     const { bookIds } = req.body;
     if (Array.isArray(bookIds)) {
         for (const bookId of bookIds) {

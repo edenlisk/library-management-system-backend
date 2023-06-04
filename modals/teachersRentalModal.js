@@ -16,6 +16,7 @@ const teachersRentalSchema = new mongoose.Schema(
           type: String,
         },
         book_id: {
+          immutable: true,
           type: String,
           required: true
         },
