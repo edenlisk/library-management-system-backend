@@ -84,12 +84,16 @@ exports.getRental = catchAsync(async (req, res, next) => {
 
 exports.updateRental = catchAsync(async (req, res, next) => {
     const updatedRental = await Rental.findById(req.params.rentalId);
-    if (!updatedRental) return next(new AppError("This rental does not exists!", 400));
+    if (!updatedRental) return next(new AppError("This rental does not exists!", 401));
+    if (updatedRental.returned === true) return next(new AppError("Rental cannot be updated when returned", 401));
+    if (req.body.nameOfBook) updatedRental.nameOfBook = req.body.nameOfBook;
     if (req.body.dueDate) updatedRental.dueDate = req.body.dueDate;
     if (req.body.returnDate) updatedRental.returnDate = req.body.returnDate;
-    if (req.body.returned) updatedRental.returned = req.body.returned;
+    if (req.body.returned === true) updatedRental.returned = true;
+    if (req.body.returned === false) updatedRental.returned = false;
     if (req.body.bookId) updatedRental.bookId = req.body.bookId;
-    if (req.body.active) updatedRental.active = req.body.active;
+    if (req.body.active === true) updatedRental.active = true;
+    if (req.body.active === false) updatedRental.active = false;
     await updatedRental.save({validateModifiedOnly: true});
     res
         .status(200)

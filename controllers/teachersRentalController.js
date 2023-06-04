@@ -89,9 +89,11 @@ exports.createTeacherRental = catchAsync(async (req, res, next) => {
 exports.updateTeacherRental = catchAsync(async (req, res, next) => {
     const updatedTeacherRental = await TeachersRental.findById(req.params.id);
     if (!updatedTeacherRental) return next(new AppError("Rental no longer exists", 401));
+    if (updatedTeacherRental.returned === true) return next(new AppError("Rental cannot be updated when returned", 401));
     if (req.body.nameOfBook) updatedTeacherRental.nameOfBook = req.body.nameOfBook;
     if (req.body.dueDate) updatedTeacherRental.dueDate = req.body.dueDate;
-    if (req.body.returned) updatedTeacherRental.returned = req.body.returned;
+    if (req.body.returned === true) updatedTeacherRental.returned = true;
+    if (req.body.returned === false) updatedTeacherRental.returned = false;
     if (req.body.active === true) updatedTeacherRental.active = true;
     if (req.body.active === false) updatedTeacherRental.active = false;
     if (req.body.returnDate) updatedTeacherRental.returnDate = req.body.returnDate;
