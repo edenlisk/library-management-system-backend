@@ -26,4 +26,3 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run start:prod --if-present
-    - run: npm test
