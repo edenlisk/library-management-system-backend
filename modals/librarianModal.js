@@ -58,6 +58,11 @@ const librarianSchema = new mongoose.Schema(
                 }
             })
         },
+        accessibility: {
+          type: String,
+          enum: ["librarian", "admin"],
+          default: () => 'librarian'
+        },
         password: {
             type: String,
             required: [true, "Librarian must have a password"],
