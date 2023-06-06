@@ -12,7 +12,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 })
 
-const app = require('../app');
+const app = require('./app');
 const debug = require('debug')('library-management-system:server');
 const http = require('http');
 
@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGO_URL, { dbName: "library-management" })
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '5001');
+const port = normalizePort(process.env.PORT || 5001);
 app.set('port', port);
 
 /**

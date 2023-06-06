@@ -37,9 +37,10 @@ exports.getTeacherRental = catchAsync(async (req, res, next) => {
 exports.createTeacherRental = catchAsync(async (req, res, next) => {
     const book = await Book.findOne({_id: req.body.book_id});
     if (!book) return next(new AppError("This book does not exist!", 400));
-    const { bookName, _id, author, academicLevel, categoryName, language, availableCopy } = book;
-    const { bookIds } = req.body;
+    const {bookName, _id, author, academicLevel, categoryName, language, availableCopy} = book;
+    const {bookIds} = req.body;
     if (Array.isArray(bookIds)) {
+        if (bookIds.length > availableCopy) return next(new AppError(`No enough books, there are only ${availableCopy} copies`, 401));
         for (const bookId of bookIds) {
             await TeachersRental.create(
                 {
@@ -111,7 +112,7 @@ exports.updateTeacherRental = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteTeacherRental = catchAsync(async (req, res, next) => {
-    await TeachersRental.deleteOne({ _id: req.params.id });
+    await TeachersRental.deleteOne({_id: req.params.id});
     res
         .status(204)
         .json(
