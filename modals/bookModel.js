@@ -44,7 +44,12 @@ const bookSchema = new mongoose.Schema(
         },
         numberOfRentals: {
          type: Number,
-         default: 0
+         default: 0,
+         validate: {
+             validator: (elem) => {
+                 return elem >= 0;
+             }
+         }
         },
         availableCopy: {
             type: Number,
