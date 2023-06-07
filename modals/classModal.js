@@ -11,7 +11,7 @@ const classSchema = new mongoose.Schema(
             required: [true, 'Class must have a name'],
             validate: {
                 validator: (elem) => {
-                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(elem)
+                    return  /^[a-zA-Z0-9]+$/g.test(elem)
                 },
                 message: "Invalid name, can't contain special characters"
             }
@@ -51,7 +51,6 @@ const classSchema = new mongoose.Schema(
 
 classSchema.pre('save', async function (next) {
     if (this.isNew) {
-        this.name = this.name.toUpperCase();
         const targetSchoolYear = await academicYear.findOneAndUpdate(
             {academicYear: this.academicYear},
             {$push: {classes: this._id}},
@@ -59,6 +58,7 @@ classSchema.pre('save', async function (next) {
         )
         if (!targetSchoolYear) next(new AppError(`academic Year ${this.academicYear} does not exists!`, 400));
     }
+    this.name = this.name.toUpperCase();
     next();
 })
 

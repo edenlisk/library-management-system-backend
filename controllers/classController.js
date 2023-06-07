@@ -149,33 +149,45 @@ exports.getClassesByAcademicYear = catchAsync(async (req, res, next) => {
 
 exports.importClasses = catchAsync(async (req, res, next) => {
     if (/^\d{4}-\d{4}$/.test(req.params.academicYear) !== true) {
-        return next(new AppError("Invalid academic year, It must be in this format YYYY-YYYY", 400));
+        return next(new AppError("Invalid academic year, It must be in this format YYYY-YYYY", 401));
     }
     const schoolYear = await AcademicYear.findOne({academicYear: req.params.academicYear});
     if (!schoolYear) {
-        next(new AppError("Academic Year does not exists"))
+        return next(new AppError("Academic Year does not exists", 401))
     } else {
         // const newSchoolYear = await AcademicYear.create({academicYear: req.params.academicYear});
         const classes = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!classes) next(new AppError("No classes found in this file", 401));
-        const newClasses = await Class.insertMany(classes, {ordered: false});
-        // || cls.academicYear === schoolYear.academicYear
-        newClasses.forEach((cls, index) => {
-            if (schoolYear.classes.includes(cls._id)) {
-                newClasses.splice(index, 1);
+        for (const cl of classes) {
+            console.log(cl.name, "is added")
+            const cls = await Class.findOne({name: cl.name, academicYear: req.params.academicYear});
+            if (!cls) {
+                const newClass = await Class.create(
+                    {
+                        name: cl.name,
+                        category: cl.category,
+                        students: [],
+                        academicYear: req.params.academicYear
+                    }
+                );
+                schoolYear.classes.push(newClass._id);
             }
-            schoolYear.classes.push(cls._id);
-        })
-        await schoolYear.save({validateModifiedOnly: true});
-        const populatedDoc = await schoolYear.populate('classes');
+        }
+        // const newClasses = await Class.insertMany(classes, {ordered: false});
+        // // || cls.academicYear === schoolYear.academicYear
+        // newClasses.forEach((cls, index) => {
+        //     if (schoolYear.classes.includes(cls._id)) {
+        //         newClasses.splice(index, 1);
+        //     }
+        //     schoolYear.classes.push(cls._id);
+        // })
+        // await schoolYear.save({validateModifiedOnly: true});
+        // const populatedDoc = await schoolYear.populate('classes');
         res
             .status(200)
             .json(
                 {
                     status: "Success",
-                    data: {
-                        populatedDoc
-                    }
                 }
             )
         ;
