@@ -4,6 +4,7 @@ const Rental = require('../modals/rentalsModal');
 const Book = require('../modals/bookModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const {ObjectId} = require('mongoose');
 
 const studentSchema = new mongoose.Schema(
     {
@@ -85,7 +86,7 @@ const studentSchema = new mongoose.Schema(
         }
     },
     {
-        indexes: [{ unique: true, fields: ['registrationNumber'] }],
+        indexes: [{unique: true, fields: ['registrationNumber']}],
     }
 )
 
@@ -98,54 +99,60 @@ studentSchema.methods.removeStudent = async function (req) {
     // if (!classId) next(new AppError("Student does not exists", 400));
     // await Class.updateMany({ students: _conditions._id }, { $pull: { students: _conditions._id }});
     // await Rental.deleteMany({ studentId: _conditions._id });
+
+
     await Class.updateOne(
-        {_id: req.params.classId, students: req.params.studentId, academicYear: req.params.academicYear.trim()},
-        {$pull: {students: req.params.studentId}}
-    )
-    const rentals = await Rental.find({studentId: req.params.studentId, academicYear: req.params.academicYear.trim()});
+        {_id: req.params.classId, students: req.params.studentId},
+        {$pull: {students: req.params.studentId}},
+        {new: true}
+    );
+
+    const rentals = await Rental.find({studentId: req.params.studentId, academicYear: req.params.academicYear});
     if (rentals) {
         for (const rental of rentals) {
-            const { book_id } = rental;
-            await Book.updateOne({ _id: book_id }, { $inc: { numberOfRentals: -1 } }, { runValidators: true } )
+            const {book_id} = rental;
+            await Book.updateOne({_id: book_id}, {$inc: {numberOfRentals: -1}}, {runValidators: true})
         }
     }
 
     await Rental.deleteMany(
         {studentId: req.params.studentId, academicYear: req.params.academicYear.trim()}
     )
+
     const student = this;
-    student.classIds.forEach((cls, index) => {
-        if (cls.academicYear === req.params.academicYear) {
+
+    student.classIds.forEach((item, index) => {
+        if (item.academicYear === req.params.academicYear) {
             student.classIds.splice(index, 1)
         }
-    });
+    })
+
     student.rentals.forEach((rent) => {
         if (rent.academicYear === req.params.academicYear) {
             student.rentals.rentalHistory = [];
         }
     })
-
 }
 
 
 // 'rentals.$.rentalHistory': {academicYear: req.body.academicYear}}
-studentSchema.pre('save', async function(next) {
+studentSchema.pre('save', async function (next) {
     if (this.isNew) {
         const targetClass = await Class.updateOne(
-            { _id: this.currentClassId, academicYear: this.academicYear.trim() },
-            { $push: { students: this._id } },
-            { new: true, runValidators: true }
+            {_id: this.currentClassId, academicYear: this.academicYear.trim()},
+            {$push: {students: this._id}},
+            {new: true, runValidators: true}
         )
         if (!targetClass) return next(new AppError("Class does not exists!", 400));
         this.classIds.push({academicYear: this.academicYear, classId: this.currentClassId});
         this.academicYear = undefined;
         this.currentClassId = undefined;
     }
-    next()
+    next();
 })
 
 studentSchema.pre('insertMany', async function (next, docs, options) {
-    const { classId } = options.request.params;
+    const {classId} = options.request.params;
     const targetClass = await Class.findOne({_id: classId});
     for (let i = 0; i < docs.length; i++) {
         const student = await studentsModal.findOne({registrationNumber: docs[i].registrationNumber});
@@ -170,7 +177,7 @@ studentSchema.pre('insertMany', async function (next, docs, options) {
     next();
 })
 
-studentSchema.pre('insertOne', async function (next){
+studentSchema.pre('insertOne', async function (next) {
 
 })
 
