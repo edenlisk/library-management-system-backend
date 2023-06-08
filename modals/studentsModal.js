@@ -120,18 +120,21 @@ studentSchema.methods.removeStudent = async function (req) {
     )
 
     const student = this;
+    if (student.classIds) {
+        student.classIds.forEach((item, index) => {
+            if (item.academicYear === req.params.academicYear) {
+                student.classIds.splice(index, 1)
+            }
+        })
+    }
+    if (student.rentals) {
+        student.rentals.forEach((rent) => {
+            if (rent.academicYear === req.params.academicYear) {
+                student.rentals.rentalHistory = [];
+            }
+        })
+    }
 
-    student.classIds.forEach((item, index) => {
-        if (item.academicYear === req.params.academicYear) {
-            student.classIds.splice(index, 1)
-        }
-    })
-
-    student.rentals.forEach((rent) => {
-        if (rent.academicYear === req.params.academicYear) {
-            student.rentals.rentalHistory = [];
-        }
-    })
 }
 
 
