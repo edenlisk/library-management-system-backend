@@ -123,7 +123,7 @@ exports.createStudent = catchAsync(async (req, res, next) => {
             )
         ;
     } else {
-        if (!targetClass) return  next(new AppError("Class does not exists!", 400));
+        if (!targetClass) return next(new AppError("Class does not exists!", 400));
         const newStudent = await Student.create(
             {
                 name: req.body.name,
@@ -145,7 +145,6 @@ exports.createStudent = catchAsync(async (req, res, next) => {
             )
         ;
     }
-
 
 
 })
@@ -221,7 +220,10 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
     //         }
     //     }
     // ]
-    const students = await Student.find({classIds: {$elemMatch: {classId: req.params.classId}}, rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
+    const students = await Student.find({
+        classIds: {$elemMatch: {classId: req.params.classId}},
+        rentals: {$elemMatch: {academicYear: req.params.academicYear}}
+    });
     const result = [];
     students.forEach(stu => {
         if (stu.rentals) {
@@ -262,47 +264,50 @@ exports.importStudents = catchAsync(async (req, res, next) => {
     } else {
         const students = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!students) return next(new AppError("No data found in this file", 400));
-        for (let i = 0; i < students.length; i++) {
+        for (const student of students) {
             const rep = {};
-            rep.name = students[i].name;
-            const student = await Student.findOne({registrationNumber: students[i].registrationNumber});
-            if (student) {
-                if (targetClass.students.includes(student._id) || checkExisting(student.classIds, targetClass)) {
+            rep.name = student.name;
+            const targetStudent = await Student.findOne({registrationNumber: student.registrationNumber});
+            if (targetStudent) {
+                if (targetClass.students.includes(targetStudent._id)) {
                     rep.issues = `belongs in this class or other class`;
                     rep.status = 'Not added';
                     report.push(rep);
+                    const index = students.indexOf(targetStudent);
+                    students.splice(index, 1);
                     // continue
                     // students.splice(i, 1);
                 } else {
-                    targetClass.students.push(student._id);
-                    student.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
-                    student.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
-                    await student.save({validateModifiedOnly: true});
+                    targetClass.students.push(targetStudent._id);
+                    targetStudent.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
+                    targetStudent.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
+                    await targetStudent.save({validateModifiedOnly: true});
                     await targetClass.save({validateModifiedOnly: true});
                     rep.issues = ``;
                     rep.status = "added successfully";
                     report.push(rep);
-                    // students.splice(i, 1);
+                    const index = students.indexOf(targetStudent);
+                    students.splice(index, 1);
                 }
             } else {
-                const isRegValid = /^[a-zA-Z0-9]+$/.test(students[i].registrationNumber);
-                const isNameValid = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(students[i].name);
+                const isRegValid = /^[a-zA-Z0-9]+$/.test(student.registrationNumber);
+                const isNameValid = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(student.name);
                 if (isRegValid !== true) {
                     rep.issues = `Invalid registration number, it can't contain special characters and spaces`;
                     rep.status = "Not added";
                     report.push(rep);
                 } else if (isNameValid !== true) {
                     rep.issues = `Invalid name, it can't contain special characters`;
-                    rep.status = "Not Added"
+                    rep.status = "Not Added";
                     report.push(rep);
                 } else {
                     await Student.create(
                         {
-                            name: students[i].name,
+                            name: student.name,
                             academicYear: targetClass.academicYear,
                             currentClassId: targetClass._id,
                             rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}],
-                            registrationNumber: students[i].registrationNumber
+                            registrationNumber: student.registrationNumber
                         }
                     )
                     rep.issues = ``;
@@ -328,10 +333,10 @@ exports.importStudents = catchAsync(async (req, res, next) => {
 
 const multerStorage = multer.diskStorage(
     {
-        destination: function(req, file, cb) {
+        destination: function (req, file, cb) {
             cb(null, 'public/data');
         },
-        filename: function(req, file, cb) {
+        filename: function (req, file, cb) {
             const extension = file.mimetype.split('/')[1];
             cb(null, `students-${req.params.classId}-${new Date().getTime().toString()}.${extension}`);
         }
