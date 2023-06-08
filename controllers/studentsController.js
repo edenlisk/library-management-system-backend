@@ -249,8 +249,12 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
 
 exports.importStudents = catchAsync(async (req, res, next) => {
     const targetClass = await Class.findOne({_id: req.params.classId});
-    const checkExisting = (data) => {
-        return data.some(obj => obj.academicYear === targetClass.academicYear)
+    const checkExisting = (data, target) => {
+        if (data.length > 0) {
+            return data.some(obj => obj.academicYear === target.academicYear)
+        } else {
+            return false;
+        }
     }
     const report = [];
     if (!targetClass) {
@@ -263,7 +267,7 @@ exports.importStudents = catchAsync(async (req, res, next) => {
             rep.name = students[i].name;
             const student = await Student.findOne({registrationNumber: students[i].registrationNumber});
             if (student) {
-                if (targetClass.students.includes(student._id) || checkExisting(student.classIds)) {
+                if (targetClass.students.includes(student._id) || checkExisting(student.classIds, targetClass)) {
                     rep.issues = `belongs in this class or other class`;
                     rep.status = 'Not added';
                     report.push(rep);
