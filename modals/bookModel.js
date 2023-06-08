@@ -79,7 +79,7 @@ bookSchema.pre('save', async function (next) {
                 book.numberOfBooks = book.books.length;
             })
             await category.save({validateModifiedOnly: true})
-            if (!category) return next(new AppError("Something went wrong!", 400));
+            if (!category) return next(new AppError(`Books category name ${this.categoryName} does not exists!`, 401));
         }
     }
     if (this.isModified('numberOfBooks') && !this.isNew) {

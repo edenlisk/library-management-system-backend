@@ -159,7 +159,6 @@ exports.importClasses = catchAsync(async (req, res, next) => {
         const classes = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!classes) next(new AppError("No classes found in this file", 401));
         for (const cl of classes) {
-            console.log(cl.name, "is added")
             const cls = await Class.findOne({name: cl.name, academicYear: req.params.academicYear});
             if (!cls) {
                 const newClass = await Class.create(

@@ -9,7 +9,7 @@ const categorySchema = new mongoose.Schema(
             lowercase: true,
             validate: {
                 validator: (elem) => {
-                    return /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.text(elem)
+                    return /^[a-zA-Z0-9]+$/g.test(elem)
                 },
                 message: "Invalid name, can't contain special characters"
             }
