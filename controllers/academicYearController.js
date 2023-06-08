@@ -59,16 +59,11 @@ exports.getAcademicYears = catchAsync(async (req, res, next) => {
             {
                 $match: {  }
             },
-            // {
-            //     $addFields: {
-            //         numberOfClasses: {$size: '$classes'}
-            //     }
-            // },
             {
                 $project: {
                     _id: 1,
                     academicYear: 1,
-                    numberOfClasses: {$size: '$classes'}
+                    // numberOfClasses: {$size: '$classes'}
                 }
             }
         ]
