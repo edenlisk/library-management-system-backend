@@ -76,7 +76,7 @@ const studentSchema = new mongoose.Schema(
         },
         fine: {
             type: Number,
-            default: 0,
+            default: () => 0,
             validate: {
                 validator: function (value) {
                     return value >= 0;

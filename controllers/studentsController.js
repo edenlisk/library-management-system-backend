@@ -54,7 +54,7 @@ exports.getStudent = catchAsync(async (req, res, next) => {
 
 exports.updateStudent = catchAsync(async (req, res, next) => {
     const updatedStudent = await Student.findById(req.params.studentId);
-    if (!updatedStudent) next(new AppError("Student does not exists!", 400));
+    if (!updatedStudent) return  next(new AppError("Student does not exists!", 400));
     if (req.body.name) updatedStudent.name = req.body.name;
     if (req.body.fine) updatedStudent.fine = parseInt(updatedStudent.fine) + parseInt(req.body.fine);
     await updatedStudent.save({validateModifiedOnly: true});
@@ -222,19 +222,16 @@ exports.getStudentsByClass = catchAsync(async (req, res, next) => {
     // ]
     const students = await Student.find({
         classIds: {$elemMatch: {classId: req.params.classId}},
-        rentals: {$elemMatch: {academicYear: req.params.academicYear}}
     });
     const result = [];
     students.forEach(stu => {
-        if (stu.rentals) {
-            stu.rentals.forEach(rent => {
-                if (rent.academicYear === req.params.academicYear) {
-                    const {_id, name, registrationNumber, fine} = stu;
-                    const std = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
-                    result.push(std);
-                }
-            })
-        }
+           stu.rentals.forEach(rent => {
+               if (rent.academicYear === req.params.academicYear) {
+                   const {_id, name, registrationNumber, fine} = stu;
+                   const std = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
+                   result.push(std);
+               }
+           })
     })
     res
         .status(200)
@@ -269,61 +266,49 @@ exports.importStudents = catchAsync(async (req, res, next) => {
             rep.name = student.name;
             const targetStudent = await Student.findOne({registrationNumber: student.registrationNumber});
             if (targetStudent) {
-                if (targetClass.students.includes(targetStudent._id)) {
-                    rep.issues = `belongs in this class or other class`;
-                    rep.status = 'Not added';
-                    report.push(rep);
-                    const index = students.indexOf(targetStudent);
-                    students.splice(index, 1);
-                    // continue
-                    // students.splice(i, 1);
+                if (targetStudent.classIds.some(obj => obj.academicYear === targetClass.academicYear)) {
+                    console.log('student already exists')
+                    const index = students.indexOf(student);
+                    // students.splice(index, 1);
                 } else {
-                    targetClass.students.push(targetStudent._id);
                     targetStudent.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
+                    targetClass.students.push(targetStudent._id);
                     targetStudent.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
-                    await targetStudent.save({validateModifiedOnly: true});
                     await targetClass.save({validateModifiedOnly: true});
-                    rep.issues = ``;
-                    rep.status = "added successfully";
-                    report.push(rep);
-                    const index = students.indexOf(targetStudent);
-                    students.splice(index, 1);
+                    await targetStudent.save({validateModifiedOnly: true});
+                    const index = students.indexOf(student);
+                    console.log('student exists in database but not in this class')
+                    // students.splice(index, 1);
                 }
             } else {
                 const isRegValid = /^[a-zA-Z0-9]+$/.test(student.registrationNumber);
                 const isNameValid = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(student.name);
-                if (isRegValid !== true) {
-                    rep.issues = `Invalid registration number, it can't contain special characters and spaces`;
-                    rep.status = "Not added";
-                    report.push(rep);
-                } else if (isNameValid !== true) {
-                    rep.issues = `Invalid name, it can't contain special characters`;
-                    rep.status = "Not Added";
-                    report.push(rep);
+                if (isRegValid !== true || isNameValid !== true) {
+                    const index = students.indexOf(student);
+                    console.log('invalid registration number or name')
+                    // students.splice(index, 1);
                 } else {
                     await Student.create(
                         {
                             name: student.name,
+                            registrationNumber: student.registrationNumber,
                             academicYear: targetClass.academicYear,
                             currentClassId: targetClass._id,
-                            rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}],
-                            registrationNumber: student.registrationNumber
+                            rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}]
                         }
                     )
-                    rep.issues = ``;
-                    rep.status = 'added successfully';
-                    report.push(rep);
                 }
             }
+
         }
-        // const newClass = await Class.findOne({_id: req.params.classId});
+        const newClass = await Class.findOne({_id: req.params.classId});
         res
             .status(200)
             .json(
                 {
                     status: "Success",
                     data: {
-                        report
+                        newClass
                     }
                 }
             )
