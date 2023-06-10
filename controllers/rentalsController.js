@@ -37,7 +37,8 @@ exports.allRentals = catchAsync(async (req, res, next) => {
             issueDate: {
                 $gte: startDate,
                 $lte: endDate
-            }
+            },
+            returned: false
         }
     )
     res
