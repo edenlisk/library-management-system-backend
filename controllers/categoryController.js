@@ -37,79 +37,52 @@ exports.getCategory = catchAsync(async (req, res, next) => {
 })
 
 exports.createCategory = catchAsync(async (req, res, next) => {
-    if (req.body.categoryName === 'novel') {
-        const newCategory = await Category.create(
+    const newCategory = await Category.create(
+        {
+            categoryName: req.body.categoryName,
+            books: [
+                {
+                    academicLevel: 'senior one',
+                    books: []
+                },
+                {
+                    academicLevel: 'senior two',
+                    books: []
+                },
+                {
+                    academicLevel: 'senior three',
+                    books: []
+                },
+                {
+                    academicLevel: 'senior four',
+                    books: []
+                },
+                {
+                    academicLevel: 'senior five',
+                    books: []
+                },
+                {
+                    academicLevel: 'senior six',
+                    books: []
+                },
+                {
+                    academicLevel: 'others',
+                    books: []
+                }
+            ]
+        }
+    )
+
+    res
+        .status(200)
+        .json(
             {
-                categoryName: req.body.categoryName,
-                books: [
-                    {
-                        academicLevel: 'other',
-                        books: []
-                    }
-                ]
+                status: 'Success',
+                data: {
+                    newCategory
+                }
             }
         )
-        res
-            .status(200)
-            .json(
-                {
-                    status: 'Success',
-                    data: {
-                        newCategory
-                    }
-                }
-            )
-        ;
-
-    } else {
-        const newCategory = await Category.create(
-            {
-                categoryName: req.body.categoryName,
-                books: [
-                    {
-                        academicLevel: 's1',
-                        books: []
-                    },
-                    {
-                        academicLevel: 's2',
-                        books: []
-                    },
-                    {
-                        academicLevel: 's3',
-                        books: []
-                    },
-                    {
-                        academicLevel: 's4',
-                        books: []
-                    },
-                    {
-                        academicLevel: 's5',
-                        books: []
-                    },
-                    {
-                        academicLevel: 's6',
-                        books: []
-                    },
-                    {
-                        academicLevel: 'other',
-                        books: []
-                    }
-                ]
-            }
-        )
-
-        res
-            .status(200)
-            .json(
-                {
-                    status: 'Success',
-                    data: {
-                        newCategory
-                    }
-                }
-            )
-        ;
-    }
-
+    ;
 })
 

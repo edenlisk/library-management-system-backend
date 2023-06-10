@@ -66,9 +66,9 @@ const bookSchema = new mongoose.Schema(
 bookSchema.pre('save', async function (next) {
     if (this.isNew) {
         const targetCategory = await Category.findOne({categoryName: this.categoryName});
-        if (!targetCategory) return next(new AppError("Category no longer exists!", 400));
+        if (!targetCategory) return next(new AppError("Category no longer exists!", 401));
         if (!targetCategory) {
-            return next(new AppError("Category no longer exists or Book already exists in another category", 400));
+            return next(new AppError("Category no longer exists or Book already exists in another category", 401));
         } else {
             const category = await Category.findOneAndUpdate(
                 {categoryName: this.categoryName, books: {$elemMatch: {academicLevel: this.academicLevel}}},
@@ -79,7 +79,7 @@ bookSchema.pre('save', async function (next) {
                 book.numberOfBooks = book.books.length;
             })
             await category.save({validateModifiedOnly: true})
-            if (!category) return next(new AppError(`Books category name ${this.categoryName} does not exists!`, 401));
+            if (!category) return next(new AppError(`Books category named ${this.categoryName} does not exists!`, 401));
         }
     }
     if (this.isModified('numberOfBooks') && !this.isNew) {

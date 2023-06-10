@@ -29,6 +29,29 @@ exports.getAllRentals = catchAsync(async (req, res, next) => {
     ;
 })
 
+exports.allRentals = catchAsync(async (req, res, next) => {
+    const rentals = await Rental.find(
+        {
+            issueDate: {
+                $gt: req.params.startDate,
+                $lte: req.params.endDate
+            }
+        }
+    )
+    console.log(req.params);
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    rentals
+                }
+            }
+        )
+    ;
+})
+
 exports.createRental = catchAsync(async (req, res, next) => {
     const book = await Book.findOne({_id: req.body.book_id});
     if (!book) return next(new AppError("This Book does not exist!", 400));
