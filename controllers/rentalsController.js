@@ -30,15 +30,16 @@ exports.getAllRentals = catchAsync(async (req, res, next) => {
 })
 
 exports.allRentals = catchAsync(async (req, res, next) => {
+    const startDate = req.params.startDate ? new Date(req.params.startDate) : new Date().toISOString();
+    const endDate = req.params.endDate ? new Date(req.params.endDate) : new Date().toISOString();
     const rentals = await Rental.find(
         {
             issueDate: {
-                $gt: req.params.startDate,
-                $lte: req.params.endDate
+                $gte: startDate,
+                $lte: endDate
             }
         }
     )
-    console.log(req.params);
     res
         .status(200)
         .json(
