@@ -16,8 +16,8 @@ router.route('/')
 router.route('/inactive-rentals')
     .get(inactiveRentals)
 
-router.route('/all-rentals/:startDate/:endDate')
-    .post(allRentals)
+router.route('/all-rentals/')
+    .get(allRentals)
 
 router.route('/:academicYear/:studentId')
     .get(getRentalsByStudent)

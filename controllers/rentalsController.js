@@ -32,15 +32,7 @@ exports.getAllRentals = catchAsync(async (req, res, next) => {
 exports.allRentals = catchAsync(async (req, res, next) => {
     const startDate = req.params.startDate ? new Date(req.params.startDate) : new Date(new Date().toISOString().split('T')[0]);
     const endDate = req.params.endDate ? new Date(req.params.endDate) : new Date(new Date().toISOString().split('T')[0]);
-    const rentals = await Rental.find(
-        {
-            issueDate: {
-                $gte: startDate,
-                $lte: endDate
-            },
-            returned: false
-        }
-    )
+    const rentals = await Rental.find({returned: false});
     res
         .status(200)
         .json(
@@ -57,7 +49,7 @@ exports.allRentals = catchAsync(async (req, res, next) => {
 exports.createRental = catchAsync(async (req, res, next) => {
     const book = await Book.findOne({_id: req.body.book_id});
     if (!book) return next(new AppError("This Book does not exist!", 400));
-    const { bookName, _id, author, academicLevel, categoryName, language, availableCopy } = book;
+    const {bookName, _id, author, academicLevel, categoryName, language, availableCopy} = book;
     const student = await Rental.findOne({studentId: req.params.studentId, book_id: _id, returned: false});
     if (student) return next(new AppError("Student already has this book", 400));
     const newRental = new Rental(
@@ -134,7 +126,7 @@ exports.updateRental = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteRental = catchAsync(async (req, res, next) => {
-    await Rental.deleteOne({ _id: req.params.rentalId });
+    await Rental.deleteOne({_id: req.params.rentalId});
     res
         .status(204)
         .json(
@@ -161,7 +153,7 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
     if (!studentRentals) return next(new AppError("Student does not exists", 400));
 
     const rentals = studentRentals.rentals.filter(rent => rent.academicYear === req.params.academicYear);
-    const { rentalHistory } = rentals[0];
+    const {rentalHistory} = rentals[0];
     res
         .status(200)
         .json(
@@ -177,15 +169,27 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
 
 exports.inactiveRentals = catchAsync(async (req, res, next) => {
     const rawRentals = await Rental.find({active: false, returned: false})
-            .populate('studentId');
+        .populate('studentId');
     const rawTeachersRentals = await TeachersRental.find({active: false, returned: false});
     const rentals = [];
     if (rawRentals) {
         for (const rental of rawRentals) {
-            const { name, classIds } = rental.studentId;
+            const {name, classIds} = rental.studentId;
             const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
-            const {name:className} = await Class.findOne(filteredClass[0].classId);
-            const { _id, nameOfBook, author, bookId, categoryName, issueDate, dueDate, academicLevel, language, academicYear, book_id } = rental;
+            const {name: className} = await Class.findOne(filteredClass[0].classId);
+            const {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                categoryName,
+                issueDate,
+                dueDate,
+                academicLevel,
+                language,
+                academicYear,
+                book_id
+            } = rental;
             const rent = {
                 _id,
                 nameOfBook,
@@ -197,7 +201,7 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
                 categoryName,
                 language,
                 academicYear,
-                rentalFor:name,
+                rentalFor: name,
                 className,
                 model: 'student'
             }
@@ -206,7 +210,20 @@ exports.inactiveRentals = catchAsync(async (req, res, next) => {
     }
     if (rawTeachersRentals) {
         for (const rental of rawTeachersRentals) {
-            const { _id, nameOfBook, author, bookId, rentalFor, categoryName, issueDate, dueDate, academicLevel, language, academicYear, book_id } = rental;
+            const {
+                _id,
+                nameOfBook,
+                author,
+                bookId,
+                rentalFor,
+                categoryName,
+                issueDate,
+                dueDate,
+                academicLevel,
+                language,
+                academicYear,
+                book_id
+            } = rental;
             const rent = {
                 _id,
                 nameOfBook,
