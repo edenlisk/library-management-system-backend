@@ -2,6 +2,7 @@ const csvtojson = require('csvtojson');
 const multer = require('multer');
 const Category = require('../modals/categoryModel');
 const Book = require('../modals/bookModel');
+const Settings = require('../modals/settingsModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -100,6 +101,32 @@ exports.getBook = catchAsync(async (req, res, next) => {
     ;
 })
 
+exports.lessBooks = catchAsync(async (req, res, next) => {
+    const { limitPercentage } = await Settings.findOne().limit(1);
+    const threshold = limitPercentage / 100;
+    const books = await Book.find({
+        $expr: {
+            $lte: [
+                "$availableCopy",
+                {
+                    $multiply: ["$numberOfBooks", threshold]
+                }
+            ]
+        }
+    });
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    books
+                }
+            }
+        )
+    ;
+})
+
 exports.importBooks = catchAsync(async (req, res, next) => {
     const books = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
     if (!books) return next(new AppError("No data found in file uploaded", 400));
@@ -109,7 +136,15 @@ exports.importBooks = catchAsync(async (req, res, next) => {
         if (category) {
             const bk = await Book.findOne({bookName: book.bookName.trim(), academicLevel: book.academicLevel.trim()});
             if (!bk) {
-                await Book.create(book);
+                await Book.create({
+                    bookName: book.bookName,
+                    author: book.author,
+                    academicLevel: book.academicLevel,
+                    edition: book.edition,
+                    language: book.language,
+                    categoryName: book.categoryName,
+                    numberOfBooks: book.numberOfBooks,
+                });
             }
         }
     }

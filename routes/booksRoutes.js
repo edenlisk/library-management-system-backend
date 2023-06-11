@@ -6,16 +6,20 @@ const {
     createBook,
     updateBook,
     uploadBooks,
-    importBooks } = require('../controllers/bookController');
+    importBooks, lessBooks } = require('../controllers/bookController');
 
 
 router.route('/')
     .get(getAllBooks)
     .post(createBook)
 
+router.route('/less-books')
+    .get(lessBooks)
+
 router.route('/:bookId')
     .get(getBook)
     .patch(updateBook)
+
 
 router.route('/upload')
     .post(uploadBooks, importBooks)

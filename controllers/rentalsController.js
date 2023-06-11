@@ -53,7 +53,7 @@ exports.createRental = catchAsync(async (req, res, next) => {
     if (!book) return next(new AppError("This Book does not exist!", 401));
     const {bookName, _id, author, academicLevel, categoryName, language, availableCopy, numberOfBooks} = book;
     const limitPercentage = Math.round(numberOfBooks * settings.limitPercentage / 100);
-    if (limitPercentage >= availableCopy) return next(new AppError(`Sorry, ${bookName} is in low availability`));
+    if (limitPercentage >= availableCopy) return next(new AppError(`Sorry, You've reached the maximum number of rentals for this book.`));
     const student = await Rental.findOne({studentId: req.params.studentId, book_id: _id, returned: false});
     if (student) return next(new AppError("Student already has this book", 401));
     const newRental = new Rental(
@@ -64,7 +64,7 @@ exports.createRental = catchAsync(async (req, res, next) => {
             language,
             categoryName,
             book_id: _id,
-            bookId: req.body.bookId,
+            bookId: req.body.bookId.trim(),
             issueDate: req.body.issueDate,
             dueDate: req.body.dueDate,
             studentId: req.params.studentId,

@@ -201,7 +201,7 @@ exports.generateNotificationReport = catchAsync(async (req, res, next) => {
     const teachersRentals = await TeachersRentals.find(
         {
             dueDate: {
-                $gt: startDate,
+                $gte: startDate,
                 $lte: notificationDate
             },
             returned: false,
@@ -211,7 +211,7 @@ exports.generateNotificationReport = catchAsync(async (req, res, next) => {
     const rentals = await Rental.find(
         {
             dueDate: {
-                $gt: startDate,
+                $gte: startDate,
                 $lte: notificationDate
             },
             returned: false,
