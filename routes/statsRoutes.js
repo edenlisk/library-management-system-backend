@@ -34,7 +34,7 @@ router.route('/top-books')
 router.route('/notification')
     .get(notification)
 
-router.route('/all-rentals')
+router.route('/all-rentals/:academicYear')
     .get(allRentals);
 
 router.route('/total-revenue')

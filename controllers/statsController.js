@@ -706,7 +706,7 @@ exports.notification = catchAsync(async (req, res, next) => {
     const teachersRentals = await TeachersRental.find(
         {
             dueDate: {
-                $gt: startDate,
+                $gte: startDate,
                 $lte: notificationDate
             },
             returned: false,
@@ -716,7 +716,7 @@ exports.notification = catchAsync(async (req, res, next) => {
     const rentals = await Rental.find(
         {
             dueDate: {
-                $gt: startDate,
+                $gte: startDate,
                 $lte: notificationDate
             },
             returned: false,
@@ -838,8 +838,8 @@ exports.totalStats = catchAsync(async (req, res, next) => {
 })
 
 exports.allRentals = catchAsync(async (req, res, next) => {
-    const studentsRentals = await Rental.find({returned: false}).populate('studentId');
-    const teachersRentals = await TeachersRental.find({returned: false}).populate('teacherId');
+    const studentsRentals = await Rental.find({returned: false, academicYear: req.params.academicYear}).populate('studentId');
+    const teachersRentals = await TeachersRental.find({returned: false, academicYear: req.params.academicYear}).populate('teacherId');
     const allRentals = [];
     if (studentsRentals) {
         for (const rental of studentsRentals) {
