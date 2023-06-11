@@ -839,7 +839,7 @@ exports.totalStats = catchAsync(async (req, res, next) => {
 
 exports.allRentals = catchAsync(async (req, res, next) => {
     const studentsRentals = await Rental.find({returned: false, academicYear: req.params.academicYear}).populate('studentId');
-    const teachersRentals = await TeachersRental.find({returned: false, academicYear: req.params.academicYear}).populate('teacherId');
+    const teachersRentals = await TeachersRental.find({ returned: false }).populate('teacherId');
     const allRentals = [];
     if (studentsRentals) {
         for (const rental of studentsRentals) {
