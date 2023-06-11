@@ -37,50 +37,61 @@ exports.getCategory = catchAsync(async (req, res, next) => {
 })
 
 exports.createCategory = catchAsync(async (req, res, next) => {
-    const newCategory = await Category.create(
-        {
-            categoryName: req.body.categoryName,
-            books: [
-                {
-                    academicLevel: 'senior one',
-                    books: []
-                },
-                {
-                    academicLevel: 'senior two',
-                    books: []
-                },
-                {
-                    academicLevel: 'senior three',
-                    books: []
-                },
-                {
-                    academicLevel: 'senior four',
-                    books: []
-                },
-                {
-                    academicLevel: 'senior five',
-                    books: []
-                },
-                {
-                    academicLevel: 'senior six',
-                    books: []
-                },
-                {
-                    academicLevel: 'others',
-                    books: []
-                }
-            ]
-        }
-    )
+    if (req.body.categoryName.toLowerCase().trim() === 'novel') {
+        await Category.create(
+            {
+                categoryName: req.body.categoryName.trim(),
+                books: [
+                    {
+                        academicLevel: 'others',
+                        books: []
+                    }
+                ]
+            }
+        )
+    } else {
+        await Category.create(
+            {
+                categoryName: req.body.categoryName,
+                books: [
+                    {
+                        academicLevel: 'senior one',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior two',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior three',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior four',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior five',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior six',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'others',
+                        books: []
+                    }
+                ]
+            }
+        )
+    }
 
     res
         .status(200)
         .json(
             {
                 status: 'Success',
-                data: {
-                    newCategory
-                }
             }
         )
     ;
