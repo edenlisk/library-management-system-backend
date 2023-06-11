@@ -18,7 +18,6 @@ exports.getSettings = catchAsync(async (req, res, next) => {
 
 exports.createSettings = catchAsync(async (req, res, next) => {
     const settings = await Settings.create({});
-    console.log(settings);
     res
         .status(200)
         .json(
@@ -38,6 +37,7 @@ exports.updateSettings = catchAsync(async (req, res, next) => {
     if (req.body.graceDays || req.body.graceDays === 0) settings.graceDays = req.body.graceDays;
     if (req.body.inactivityDays || req.body.inactivityDays === 0) settings.inactivityDays = req.body.inactivityDays;
     if (req.body.fixedAmount || req.body.fixedAmount === 0) settings.fixedAmount = req.body.fixedAmount;
+    if (req.body.limitPercentage || req.body.limitPercentage === 0) settings.limitPercentage = req.body.limitPercentage;
     await settings.save({validateModifiedOnly: true});
     res
         .status(200)

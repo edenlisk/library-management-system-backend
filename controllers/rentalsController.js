@@ -2,6 +2,7 @@ const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
 const Book = require('../modals/bookModel');
 const Class = require('../modals/classModal');
+const Settings = require('../modals/settingsModel');
 const TeachersRental = require('../modals/teachersRentalModal');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
@@ -48,10 +49,13 @@ exports.allRentals = catchAsync(async (req, res, next) => {
 
 exports.createRental = catchAsync(async (req, res, next) => {
     const book = await Book.findOne({_id: req.body.book_id});
-    if (!book) return next(new AppError("This Book does not exist!", 400));
-    const {bookName, _id, author, academicLevel, categoryName, language, availableCopy} = book;
+    const settings = await Settings.findOne().limit(1);
+    if (!book) return next(new AppError("This Book does not exist!", 401));
+    const {bookName, _id, author, academicLevel, categoryName, language, availableCopy, numberOfBooks} = book;
+    const limitPercentage = Math.round(numberOfBooks * settings.limitPercentage / 100);
+    if (limitPercentage >= availableCopy) return next(new AppError(`Sorry, ${bookName} is in low availability`));
     const student = await Rental.findOne({studentId: req.params.studentId, book_id: _id, returned: false});
-    if (student) return next(new AppError("Student already has this book", 400));
+    if (student) return next(new AppError("Student already has this book", 401));
     const newRental = new Rental(
         {
             nameOfBook: bookName,

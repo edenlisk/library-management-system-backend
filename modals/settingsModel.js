@@ -41,6 +41,16 @@ const settingsSchema = new mongoose.Schema(
                 message: 'This cannot be negative'
             },
             default: () => 5000
+        },
+        limitPercentage: {
+            type: Number,
+            validate: {
+                validator: (elem) => {
+                    return elem >= 0
+                },
+                message: "This rental percentage limit can't be negative"
+            },
+            default: () => 30
         }
     }
 )

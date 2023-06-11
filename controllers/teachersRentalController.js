@@ -1,5 +1,6 @@
 const TeachersRental = require('../modals/teachersRentalModal');
 const Book = require('../modals/bookModel');
+const Settings = require('../modals/settingsModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -35,9 +36,12 @@ exports.getTeacherRental = catchAsync(async (req, res, next) => {
 })
 
 exports.createTeacherRental = catchAsync(async (req, res, next) => {
+    const settings = await Settings.findOne().limit(1);
     const book = await Book.findOne({_id: req.body.book_id});
-    if (!book) return next(new AppError("This book does not exist!", 400));
-    const {bookName, _id, author, academicLevel, categoryName, language, availableCopy} = book;
+    if (!book) return next(new AppError("This book does not exist!", 401));
+    const {bookName, _id, author, academicLevel, categoryName, language, availableCopy, numberOfBooks} = book;
+    const limitPercentage = Math.round(numberOfBooks * settings.limitPercentage / 100);
+    if (limitPercentage >= availableCopy) return next(new AppError(`Sorry, ${bookName} is in low availability`))
     const {bookIds} = req.body;
     if (Array.isArray(bookIds)) {
         if (bookIds.length > availableCopy) return next(new AppError(`No enough books, there are only ${availableCopy} copies`, 401));
@@ -50,7 +54,7 @@ exports.createTeacherRental = catchAsync(async (req, res, next) => {
                     language,
                     categoryName,
                     book_id: _id,
-                    bookId: bookId,
+                    bookId: bookId.trim(),
                     teacherId: req.body.teacherId,
                     issueDate: req.body.issueDate,
                     dueDate: req.body.dueDate,
