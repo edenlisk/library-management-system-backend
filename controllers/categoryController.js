@@ -4,8 +4,7 @@ const AppError = require('../utils/appError');
 
 
 exports.getAllCategories = catchAsync(async (req, res, next) => {
-    const categories = await Category.find().select({books: 0})
-    ;
+    const categories = await Category.find().select({books: 0});
 
     res
         .status(200)
@@ -44,6 +43,26 @@ exports.createCategory = catchAsync(async (req, res, next) => {
                 books: [
                     {
                         academicLevel: 'others',
+                        books: []
+                    }
+                ]
+            }
+        )
+    } else if (req.body.categoryName.toLowerCase() === 'creative art' || 'music' || 'ict') {
+        await Category.create(
+            {
+                categoryName: req.body.categoryName,
+                books: [
+                    {
+                        academicLevel: 'senior one',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior two',
+                        books: []
+                    },
+                    {
+                        academicLevel: 'senior three',
                         books: []
                     }
                 ]
