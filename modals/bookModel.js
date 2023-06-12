@@ -12,7 +12,7 @@ const bookSchema = new mongoose.Schema(
         },
         author: {
           type: String,
-          required: true
+          // required: true
         },
         academicLevel: {
           type: String,
