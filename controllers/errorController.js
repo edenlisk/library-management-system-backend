@@ -1,21 +1,23 @@
 const AppError = require('./../utils/appError');
 
 const handleCastErrorDB = err => {
-    console.log(err)
     const message = `Invalid ${err.path}: ${err.value}`;
     return new AppError(message, 400);
 }
 
 const handleDuplicateFieldsDB = (err) => {
     const value = err.errmsg.match(/(["'])(\\?.)*?/)[0];
+    if ('bookNameAcademicLevel' in err.keyValue) {
+        return new AppError(`book named: ${err.keyValue.bookNameAcademicLevel} already exists`, 401);
+    }
     const message = `Duplicate field value: ${value}. please use another value`;
-    return new AppError(message, 400);
+    return new AppError(message, 401);
 }
 
 const handleValidationErrorDB = (err) => {
     const errors = Object.values(err.errors);
     const message = `Invalid input data: ${errors.join('. ')}`
-    return new AppError(message, 400);
+    return new AppError(message, 401);
 }
 
 const sendErrorDev = (err, res) => {
@@ -63,7 +65,7 @@ module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'Error';
     if (process.env.NODE_ENV === 'development') {
-        // console.log(error);
+        err = handleDuplicateFieldsDB(err);
         sendErrorDev(err, res);
     } else if (process.env.NODE_ENV === 'production') {
         if (err.name === 'CastError') err = handleCastErrorDB(err);
