@@ -1,3 +1,4 @@
+const fs = require('fs');
 const csvtojson = require('csvtojson');
 const multer = require('multer');
 const Category = require('../modals/categoryModel');
@@ -54,8 +55,8 @@ exports.updateBook = catchAsync(async (req, res, next) => {
     if (req.body.numberOfBooks) book.numberOfBooks = req.body.numberOfBooks;
     if (req.body.author) book.author = req.body.author;
     if (req.body.edition) book.edition = req.body.edition;
+    if (req.body.language) book.language = req.body.language;
     await book.save({validateModifiedOnly: true});
-
     res
         .status(200)
         .json(
@@ -128,6 +129,9 @@ exports.lessBooks = catchAsync(async (req, res, next) => {
 })
 
 exports.importBooks = catchAsync(async (req, res, next) => {
+    if (!fs.existsSync(`${__dirname}/../public/data/${req.file.filename}`)) {
+        return next(new AppError('File not found, please try again', 401));
+    }
     const books = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
     if (!books) return next(new AppError("No data found in file uploaded", 400));
     for (const book of books) {

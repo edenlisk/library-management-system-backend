@@ -75,11 +75,11 @@ bookSchema.pre('save', async function (next) {
                 {$push: {'books.$.books': this._id}},
                 {new: true, runValidators: true}
             )
+            if (!category) return next(new AppError(`Books category named ${this.categoryName} does not exists!`, 401));
             category.books.forEach(book => {
                 book.numberOfBooks = book.books.length;
             })
             await category.save({validateModifiedOnly: true})
-            if (!category) return next(new AppError(`Books category named ${this.categoryName} does not exists!`, 401));
         }
     }
     if (this.isModified('numberOfBooks') && !this.isNew) {
@@ -90,11 +90,8 @@ bookSchema.pre('save', async function (next) {
             this.availableCopy -= parseInt(numberOfBooks) - parseInt(this.numberOfBooks);
         }
     }
-    // this.bookName = this.bookName.trim();
-    // this.edition = this.edition;
-    // this.author = this.author;
-    // this.categoryName = this.categoryName.trim();
-    // this.language = this.language.trim();
+    this.bookName = this.bookName.trim();
+    this.categoryName = this.categoryName.trim();
     next();
 })
 

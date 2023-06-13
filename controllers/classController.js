@@ -1,5 +1,6 @@
-const Class = require('../modals/classModal');
+const fs = require('fs');
 const multer = require('multer');
+const Class = require('../modals/classModal');
 const AcademicYear = require('../modals/academicYear');
 const csvtojson = require('csvtojson');
 const APIFeatures = require('../utils/apiFeatures');
@@ -156,6 +157,9 @@ exports.importClasses = catchAsync(async (req, res, next) => {
         return next(new AppError("Academic Year does not exists", 401))
     } else {
         // const newSchoolYear = await AcademicYear.create({academicYear: req.params.academicYear});
+        if (!fs.existsSync(`${__dirname}/../public/data/${req.file.filename}`)) {
+            return next(new AppError('File not found, please try again', 401));
+        }
         const classes = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!classes) next(new AppError("No classes found in this file", 401));
         for (const cl of classes) {

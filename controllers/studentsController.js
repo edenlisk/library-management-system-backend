@@ -1,7 +1,8 @@
+const fs = require('fs');
+const multer = require('multer');
 const Student = require('../modals/studentsModal');
 const Class = require('../modals/classModal');
 const csvtojson = require('csvtojson');
-const multer = require('multer');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -259,6 +260,9 @@ exports.importStudents = catchAsync(async (req, res, next) => {
     if (!targetClass) {
         return next(new AppError("Class does not exists", 401));
     } else {
+        if (!fs.existsSync(`${__dirname}/../public/data/${req.file.filename}`)) {
+            return next(new AppError('File not found, please try again', 401));
+        }
         const students = await csvtojson().fromFile(`${__dirname}/../public/data/${req.file.filename}`);
         if (!students) return next(new AppError("No data found in this file", 400));
         for (const student of students) {
