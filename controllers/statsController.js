@@ -816,11 +816,11 @@ exports.totalStats = catchAsync(async (req, res, next) => {
             }
         ]
     )
-    const lostBooks = await Rental.countDocuments({active: false, returned: false});
+    const lostBooksStudents = await Rental.countDocuments({active: false, returned: false});
+    const lostBooksTeachers = await TeachersRental.countDocuments({active: false, returned: false});
     const issuedBooksStudents = await Rental.countDocuments({returned: false});
     const issuedBooksTeachers = await TeachersRental.countDocuments({returned: false})
     const issuedBooks = issuedBooksStudents + issuedBooksTeachers;
-    // const revenue = revenues[0];
     res
         .status(200)
         .json(
@@ -830,7 +830,7 @@ exports.totalStats = catchAsync(async (req, res, next) => {
                     revenue: revenues[0].totalRevenue,
                     books: books[0].totalBooks,
                     issuedBooks,
-                    lostBooks
+                    lostBooks: lostBooksStudents + lostBooksTeachers
                 }
             }
         )
