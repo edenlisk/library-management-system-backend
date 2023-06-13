@@ -1,6 +1,7 @@
 const Class = require('../modals/classModal');
 const Category = require('../modals/categoryModel');
 const TeachersRental = require('../modals/teachersRentalModal');
+const Teacher = require('../modals/teachersModal');
 const Student = require('../modals/studentsModal');
 const Rental = require('../modals/rentalsModal');
 const Book = require('../modals/bookModel');
@@ -843,9 +844,15 @@ exports.allRentals = catchAsync(async (req, res, next) => {
     const allRentals = [];
     if (studentsRentals) {
         for (const rental of studentsRentals) {
-            const { name, classIds } = rental.studentId;
-            const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
-            const {name:className} = await Class.findOne(filteredClass[0].classId);
+            let name = '';
+            let className = '';
+            if (rental.studentId) {
+                const { name:studentName, classIds } = rental.studentId;
+                name = studentName;
+                const filteredClass = classIds.filter(cls => cls.academicYear === rental.academicYear);
+                const {name:targetClass} = await Class.findOne(filteredClass[0].classId);
+                className = targetClass;
+            }
             const { _id, nameOfBook, author, bookId, categoryName, issueDate, dueDate, academicLevel } = rental;
             const rent = {
                 _id,
@@ -865,7 +872,11 @@ exports.allRentals = catchAsync(async (req, res, next) => {
     }
     if (teachersRentals) {
         for (const rental of teachersRentals) {
-            const {name} = rental.teacherId;
+            let name = '';
+            if (rental.teacherId) {
+                const {name:teacherName} = rental.teacherId;
+                name = teacherName;
+            }
             const { _id, nameOfBook, author, bookId, rentalFor, categoryName, issueDate, dueDate, academicLevel } = rental;
             const rent = {
                 _id,

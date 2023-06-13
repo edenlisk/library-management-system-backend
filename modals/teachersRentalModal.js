@@ -51,9 +51,9 @@ const teachersRentalSchema = new mongoose.Schema(
         },
         teacherId: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'Teacher',
             required: true,
-            immutable: true,
-            ref: 'Teacher'
+            immutable: true
         },
         returned: {
             type: Boolean,

@@ -132,7 +132,7 @@ exports.generateClassReport = catchAsync(async (req, res, next) => {
 exports.generateStudentReport = catchAsync(async (req, res, next) => {
     const student = await Student.findOne({_id: req.params.studentId});
     const studentRentals = await Rental.find({studentId: req.params.studentId})
-    if (!student) return next(new AppError("Student no longer exists", 403));
+    if (!student) return next(new AppError("Student no longer exists", 401));
     const studentData = [
         [
             {text: "book id", fillColor: '#93c6e8', margin: [0, 5, 0, 2]},
