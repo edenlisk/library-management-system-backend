@@ -45,7 +45,7 @@ teacherSchema.pre('deleteOne', async function(next) {
         const TeachersRentalModal = require('../modals/teachersRentalModal');
         const { _conditions } = this;
         const rentals = await TeachersRentalModal.find({teacherId: _conditions._id});
-        await TeachersRentalModal.deleteMany({ teacherID: _conditions._id });
+        await TeachersRentalModal.deleteMany({ teacherId: _conditions._id });
         if (rentals) {
             for (const rental of rentals) {
                 const { book_id } = rental;
