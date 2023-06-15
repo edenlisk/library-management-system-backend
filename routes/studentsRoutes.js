@@ -10,12 +10,16 @@ const {
     importStudents,
     uploadClassStudents } = require('../controllers/studentsController');
 const { topStudents } = require('../controllers/statsController');
+const { studentLogin } = require('../controllers/authController');
 // TODO: PROTECT ALL ROUTES
 const { restrictTo, protect } = require('../controllers/authController');
 const { generateStudentReport } = require('../utils/generatePdf');
 
 router.route('/stats/:academicYear')
     .get(topStudents)
+
+router.route('/login')
+    .post(studentLogin);
 
 router.route('/:studentId')
     .get(getStudent)

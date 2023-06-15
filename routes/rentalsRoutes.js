@@ -6,7 +6,7 @@ const { getAllRentals,
     deleteRental,
     updateRental,
     getRentalsByStudent,
-    inactiveRentals, allRentals } = require('../controllers/rentalsController');
+    inactiveRentals, getAllStudentRentals, allRentals } = require('../controllers/rentalsController');
 // TODO: PROTECT ALL ROUTES
 const { protect } = require('../controllers/authController');
 
@@ -18,6 +18,9 @@ router.route('/inactive-rentals')
 
 router.route('/all-rentals/')
     .get(allRentals)
+
+router.route('/student/:studentId')
+    .get(getAllStudentRentals);
 
 router.route('/:academicYear/:studentId')
     .get(getRentalsByStudent)

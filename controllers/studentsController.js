@@ -54,11 +54,13 @@ exports.getStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.updateStudent = catchAsync(async (req, res, next) => {
-    const updatedStudent = await Student.findById(req.params.studentId);
-    if (!updatedStudent) return  next(new AppError("Student does not exists!", 400));
+    const updatedStudent = await Student.findById(req.params.studentId).select({name: 1, password: 1, fine: 1})
+    if (!updatedStudent) return next(new AppError("Student does not exists!", 400));
     if (req.body.name) updatedStudent.name = req.body.name;
+    if (req.body.password) updatedStudent.password = req.body.password;
     if (req.body.fine) updatedStudent.fine = parseInt(updatedStudent.fine) + parseInt(req.body.fine);
     await updatedStudent.save({validateModifiedOnly: true});
+    updatedStudent.password = undefined;
     // TODO 2: CREATE `post` middleware to update class when student is created, DELETED or updated.
     res
         .status(200)
@@ -131,7 +133,8 @@ exports.createStudent = catchAsync(async (req, res, next) => {
                 currentClassId: req.params.classId,
                 academicYear: req.params.academicYear,
                 rentals: [{academicYear: req.params.academicYear, rentalHistory: []}],
-                registrationNumber: req.body.registrationNumber
+                registrationNumber: req.body.registrationNumber,
+                password: req.body.registrationNumber
             }
         );
         res
@@ -296,6 +299,7 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                         {
                             name: student.name,
                             registrationNumber: student.registrationNumber,
+                            password: student.registrationNumber,
                             academicYear: targetClass.academicYear,
                             currentClassId: targetClass._id,
                             rentals: [{academicYear: targetClass.academicYear, rentalHistory: []}]

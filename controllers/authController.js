@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const Email = require('../utils/email');
+const Student = require('../modals/studentsModal');
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET_KEY, {expiresIn: process.env.EXPIRES_IN});
@@ -183,4 +184,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 exports.adminSignup = catchAsync(async (req, res, next) => {
     req.body.role = 'super-admin';
     next();
+})
+
+exports.studentLogin = catchAsync(async (req, res, next) => {
+    const { registrationNumber, password } = req.body;
+
+    if (!registrationNumber || !password) return next(new AppError("Please provide registration number and password", 401));
+    const student = await Student.findOne({registrationNumber: registrationNumber.trim()}).select("+password");
+    if (!student || !(await student.verifyPassword(password))) {
+        return next(new AppError("Invalid registration number or Password"), 401);
+    }
+    createSendToken(student, 200, res);
 })

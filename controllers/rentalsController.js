@@ -142,22 +142,24 @@ exports.deleteRental = catchAsync(async (req, res, next) => {
 })
 
 exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
-    const studentRentals = await Student.findOne(
-        {_id: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}}
-    ).populate(
-        {
-            path: 'rentals',
-            populate: {
-                path: 'rentalHistory',
-                model: 'Rental'
-            }
-        }
-    ).select({rentals: 1});
+    // const studentRentals = await Student.findOne(
+    //     {_id: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}}
+    // ).populate(
+    //     {
+    //         path: 'rentals',
+    //         populate: {
+    //             path: 'rentalHistory',
+    //             model: 'Rental'
+    //         }
+    //     }
+    // ).select({rentals: 1});
 
-    if (!studentRentals) return next(new AppError("Student does not exists", 400));
+    const rentalHistory = await Rental.find({studentId: req.params.studentId, rentals: {$elemMatch: {academicYear: req.params.academicYear}}});
 
-    const rentals = studentRentals.rentals.filter(rent => rent.academicYear === req.params.academicYear);
-    const {rentalHistory} = rentals[0];
+    // if (!studentRentals) return next(new AppError("Student does not exists", 400));
+    //
+    // const rentals = studentRentals.rentals.filter(rent => rent.academicYear === req.params.academicYear);
+    // const {rentalHistory} = rentals[0];
     res
         .status(200)
         .json(
@@ -165,6 +167,21 @@ exports.getRentalsByStudent = catchAsync(async (req, res, next) => {
                 status: "Success",
                 data: {
                     rentalHistory
+                }
+            }
+        )
+    ;
+})
+
+exports.getAllStudentRentals = catchAsync(async (req, res, next) => {
+    const rentals = await Rental.find({studentId: req.params.studentId}).sort('-createdAt');
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    rentals
                 }
             }
         )

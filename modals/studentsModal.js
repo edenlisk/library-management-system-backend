@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const Class = require('../modals/classModal');
 const Rental = require('../modals/rentalsModal');
 const Book = require('../modals/bookModel');
@@ -82,6 +83,12 @@ const studentSchema = new mongoose.Schema(
                 },
                 message: "Fine can't be negative"
             }
+        },
+        password: {
+            type: String,
+            minLength: 5,
+            select: false,
+            required: [true, "Please provide password"]
         }
     },
     {
@@ -140,11 +147,20 @@ studentSchema.pre('save', async function (next) {
         )
         if (!targetClass) return next(new AppError("Class does not exists!", 400));
         this.classIds.push({academicYear: this.academicYear, classId: this.currentClassId});
+        this.password = await bcrypt.hash(this.password, 12);
         this.academicYear = undefined;
         this.currentClassId = undefined;
     }
+    if (this.isModified('password') && !this.isNew) {
+        this.password = await bcrypt.hash(this.password, 12);
+    }
     next();
 })
+
+studentSchema.methods.verifyPassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+}
+
 
 studentSchema.pre('insertMany', async function (next, docs, options) {
     const {classId} = options.request.params;
