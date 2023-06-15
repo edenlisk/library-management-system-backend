@@ -104,14 +104,18 @@ exports.createStudent = catchAsync(async (req, res, next) => {
             next(new AppError(`Class you're trying to insert student does not exists`, 400));
         } else {
             // student.classIds.some(obj => obj.academicYear === targetClass.academicYear) ||
-            if (targetClass.students.includes(student._id)) {
+            if (student.classIds.some(obj => obj.academicYear === targetClass.academicYear)) {
                 return next(new AppError(`Student with registration number: ${student.registrationNumber} already exists in this class`, 400));
             } else {
-                student.classIds.push({academicYear: targetClass.academicYear.trim(), classId: targetClass._id});
-                student.rentals.push({academicYear: targetClass.academicYear.trim(), rentalHistory: []});
-                targetClass.students.push(student._id);
-                await student.save({validateModifiedOnly: true});
-                await targetClass.save({validateModifiedOnly: true});
+                if (student.name.toLowerCase().includes(req.body.name.slice(0, 4).toLowerCase())) {
+                    student.classIds.push({academicYear: targetClass.academicYear.trim(), classId: targetClass._id});
+                    student.rentals.push({academicYear: targetClass.academicYear.trim(), rentalHistory: []});
+                    targetClass.students.push(student._id);
+                    await student.save({validateModifiedOnly: true});
+                    await targetClass.save({validateModifiedOnly: true});
+                } else {
+                    return next(new AppError(`This registration number: ${student.registrationNumber} is already occupied by ${student.name}`));
+                }
             }
         }
         res
@@ -224,21 +228,25 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                     const index = students.indexOf(student);
                     // students.splice(index, 1);
                 } else {
-                    targetStudent.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
-                    targetClass.students.push(targetStudent._id);
-                    targetStudent.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
-                    await targetClass.save({validateModifiedOnly: true});
-                    await targetStudent.save({validateModifiedOnly: true});
-                    const index = students.indexOf(student);
-                    console.log('student exists in database but not in this class')
-                    // students.splice(index, 1);
+                    if (targetStudent.name.toLowerCase().includes(student.name.slice(0, 4).toLowerCase())) {
+                        targetStudent.classIds.push({academicYear: targetClass.academicYear, classId: targetClass._id});
+                        targetClass.students.push(targetStudent._id);
+                        targetStudent.rentals.push({academicYear: targetClass.academicYear, rentalHistory: []});
+                        await targetClass.save({validateModifiedOnly: true});
+                        await targetStudent.save({validateModifiedOnly: true});
+                        const index = students.indexOf(student);
+                        console.log('student exists in database but not in this class');
+                        // students.splice(index, 1);
+                    } else {
+                        console.log(`This registration number: ${student.registrationNumber} is already occupied by ${student.name}`);
+                    }
                 }
             } else {
                 const isRegValid = /^[a-zA-Z0-9]+$/.test(student.registrationNumber);
                 const isNameValid = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(student.name);
                 if (isRegValid !== true || isNameValid !== true) {
                     const index = students.indexOf(student);
-                    console.log('invalid registration number or name')
+                    console.log('invalid registration number or name');
                     // students.splice(index, 1);
                 } else {
                     await Student.create(
@@ -253,7 +261,6 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                     )
                 }
             }
-
         }
         const newClass = await Class.findOne({_id: req.params.classId});
         res
