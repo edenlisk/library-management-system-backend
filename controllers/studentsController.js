@@ -170,60 +170,6 @@ exports.getStudentsByClassDeprecated = catchAsync(async (req, res, next) => {
 })
 
 exports.getStudentsByClass = catchAsync(async (req, res, next) => {
-    // const firstAggregate = [
-    //     {
-    //         $match: { }
-    //     },
-    //     {
-    //         $unwind: "$rentals"
-    //     },
-    //     {
-    //         $group: {
-    //             _id: {
-    //                 academicYear: "$rentals.academicYear",
-    //                 registrationNumber: "$registrationNumber"
-    //             },
-    //             rentalCount: {
-    //                 $sum: {
-    //                     $size: "$rentals.rentalHistory"
-    //                 }
-    //             }
-    //         }
-    //     },
-    //     {
-    //         $group: {
-    //             _id: "$_id.academicYear",
-    //             studentCount: {
-    //                 $sum: 1
-    //             },
-    //             rentalCount: {
-    //                 $sum: "$rentalCount"
-    //             }
-    //         }
-    //     },
-    //     {
-    //         $project: {
-    //             academicYear: "$_id",
-    //             studentCount: 1,
-    //             rentalCount: 1,
-    //             _id: 0
-    //         }
-    //     }
-    // ]
-    // const secondAggregation = [
-    //     {
-    //         $match: {classIds: {$elemMatch: {classId: req.params.classId}}}
-    //     },
-    //     {
-    //         $project: {
-    //             _id: 1,
-    //             name: 1,
-    //             fine: 1,
-    //             registrationNumber: 1,
-    //             numberOfRentals: { $size: "rentals.$.rentalHistory" }
-    //         }
-    //     }
-    // ]
     const students = await Student.find({
         classIds: {$elemMatch: {classId: req.params.classId}},
     });
