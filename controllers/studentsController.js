@@ -54,15 +54,15 @@ exports.getStudent = catchAsync(async (req, res, next) => {
 })
 
 exports.updateStudent = catchAsync(async (req, res, next) => {
-    const updatedStudent = await Student.findById(req.params.studentId).select({name: 1, password: 1, fine: 1})
+    const updatedStudent = await Student.findById(req.params.studentId).select({name: 1, password: 1, fine: 1, messages: 1})
     if (!updatedStudent) return next(new AppError("Student does not exists!", 400));
     if (req.body.name) updatedStudent.name = req.body.name;
     if (req.body.password) updatedStudent.password = req.body.password;
     if (req.body.fine) updatedStudent.fine = parseInt(updatedStudent.fine) + parseInt(req.body.fine);
     if (parseInt(req.body.fine) < 0) {
-        updatedStudent.sendFineReductionMessage(parseInt(req.body.fine));
+        await updatedStudent.sendFineReductionMessage(parseInt(req.body.fine) * -1);
     } else if (parseInt(req.body.fine) > 0) {
-        updatedStudent.sendFineIncreaseMessage(parseInt(req.body.fine));
+        await updatedStudent.sendFineIncreaseMessage(parseInt(req.body.fine));
     }
     await updatedStudent.save({validateModifiedOnly: true});
     updatedStudent.password = undefined;

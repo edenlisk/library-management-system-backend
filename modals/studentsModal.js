@@ -169,12 +169,12 @@ studentSchema.pre('save', async function (next) {
     next();
 })
 
-studentSchema.sendFineReductionMessage = (deductedAmount) => {
+studentSchema.methods.sendFineReductionMessage = async function(deductedAmount) {
     const message = `Your fine has been deducted by ${deductedAmount} Rwf.`;
     this.messages.push({subject: "Fine Reduction", message});
 }
 
-studentSchema.sendFineIncreaseMessage = (increaseAmount) => {
+studentSchema.methods.sendFineIncreaseMessage = async function(increaseAmount) {
     const message = `
         Your fine has been increased by ${increaseAmount} Rwf.
         If you think it's unfair, please kindly consider reaching out the librarian for more info.
