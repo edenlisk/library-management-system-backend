@@ -59,6 +59,11 @@ exports.updateStudent = catchAsync(async (req, res, next) => {
     if (req.body.name) updatedStudent.name = req.body.name;
     if (req.body.password) updatedStudent.password = req.body.password;
     if (req.body.fine) updatedStudent.fine = parseInt(updatedStudent.fine) + parseInt(req.body.fine);
+    if (parseInt(req.body.fine) < 0) {
+        updatedStudent.sendFineReductionMessage(parseInt(req.body.fine));
+    } else if (parseInt(req.body.fine) > 0) {
+        updatedStudent.sendFineIncreaseMessage(parseInt(req.body.fine));
+    }
     await updatedStudent.save({validateModifiedOnly: true});
     updatedStudent.password = undefined;
     // TODO 2: CREATE `post` middleware to update class when student is created, DELETED or updated.

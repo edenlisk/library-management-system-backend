@@ -156,7 +156,7 @@ studentSchema.pre('save', async function (next) {
             {$push: {students: this._id}},
             {new: true, runValidators: true}
         )
-        if (!targetClass) return next(new AppError("Class does not exists!", 400));
+        if (!targetClass) return next(new AppError("Class does not exists!", 401));
         this.classIds.push({academicYear: this.academicYear, classId: this.currentClassId});
         this.password = await bcrypt.hash(this.password, 12);
         this.messages = [];
@@ -168,6 +168,19 @@ studentSchema.pre('save', async function (next) {
     }
     next();
 })
+
+studentSchema.sendFineReductionMessage = (deductedAmount) => {
+    const message = `Your fine has been deducted by ${deductedAmount} Rwf.`;
+    this.messages.push({subject: "Fine Reduction", message});
+}
+
+studentSchema.sendFineIncreaseMessage = (increaseAmount) => {
+    const message = `
+        Your fine has been increased by ${increaseAmount} Rwf.
+        If you think it's unfair, please kindly consider reaching out the librarian for more info.
+    `;
+    this.messages.push({subject: "Fine Increase", message});
+}
 
 studentSchema.methods.verifyPassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);

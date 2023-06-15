@@ -51,6 +51,10 @@ const settingsSchema = new mongoose.Schema(
                 message: "This rental percentage limit can't be negative"
             },
             default: () => 30
+        },
+        fineCalculation: {
+            type: Boolean,
+            default: () => true
         }
     }
 )
