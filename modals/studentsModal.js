@@ -138,10 +138,10 @@ studentSchema.methods.removeStudent = async function (req) {
         }
     })
 
-    student.rentals.forEach((rent) => {
+    student.rentals.forEach((rent, index) => {
         if (rent.academicYear) {
             if (rent.academicYear === req.params.academicYear) {
-                student.rentals.rentalHistory = [];
+                student.rentals.splice(index, 1);
             }
         }
     })
