@@ -97,7 +97,6 @@ const studentSchema = new mongoose.Schema(
                     message: String
                 }
             ],
-            default: () => []
         }
     },
     {
@@ -157,6 +156,7 @@ studentSchema.pre('save', async function (next) {
         if (!targetClass) return next(new AppError("Class does not exists!", 400));
         this.classIds.push({academicYear: this.academicYear, classId: this.currentClassId});
         this.password = await bcrypt.hash(this.password, 12);
+        this.messages = [];
         this.academicYear = undefined;
         this.currentClassId = undefined;
     }
