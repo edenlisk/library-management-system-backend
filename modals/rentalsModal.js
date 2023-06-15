@@ -85,6 +85,21 @@ rentalSchema.pre('save', async function(next) {
         )
         if (!student) return next(new AppError("Student or academic Year does not exists!", 400));
     }
+
+    if (this.isModified('dueDate') && !this.isNew) {
+        const message = `
+            You have successfully extended due date for the book with the following details: \n
+            BookId: ${this.bookId} \n
+            Book name: ${this.nameOfBook} \n
+            Issue date: ${this.issueDate} \n
+            Due date: ${this.dueDate} \n
+            Book category: ${this.categoryName} \n
+            Language: ${this.language}  \n \n
+            done at: ${new Date().toLocaleDateString()}.
+        `;
+        await studentsModal.findByIdAndUpdate(this.studentId, {$push: {messages: {subject: "Extended rental due date", message}}});
+    }
+
     if (this.isModified('returned') && !this.isNew) {
         if (this.returned === true) {
             await Book.findOneAndUpdate(
@@ -92,6 +107,18 @@ rentalSchema.pre('save', async function(next) {
                 {$inc: {availableCopy: 1}},
                 {new: true}
             )
+            const message = `
+                You have successfully returned the book with the following details: \n
+                BookId: ${this.bookId} \n
+                Book name: ${this.nameOfBook} \n
+                Issue date: ${this.issueDate} \n
+                Due date: ${this.dueDate} \n
+                Return date: ${this.returnDate} \n
+                Book category: ${this.categoryName} \n
+                Language: ${this.language} \n \n
+                done at: ${new Date().toLocaleDateString()}.
+            `;
+            await studentsModal.findByIdAndUpdate(this.studentId, {$push: {messages: {subject: "Returned Rental notification", message}}});
             this.active = null;
             this.nextActiveDate = null;
         }
@@ -102,6 +129,19 @@ rentalSchema.pre('save', async function(next) {
             const today = new Date();
             today.setDate(today.getDate() + settings.inactivityDays);
             this.nextActiveDate = new Date(today).toISOString().split('T')[0];
+            const message = `
+                ⚠ The book with the following details is marked as lost: \n
+                BookId: ${this.bookId} \n
+                Book name: ${this.nameOfBook} \n
+                Issue date: ${this.issueDate} \n
+                Book category: ${this.categoryName} \n
+                Academic Level: ${this.academicLevel} \n
+                Language: ${this.language} \n \n \n \n
+                Please if you have this book or any useful information, kindly consider reaching out librarian. \n
+                Thank you in advance \n \n
+                done at: ${new Date().toLocaleDateString()}.
+            `;
+            await studentsModal.updateMany({classIds: {$elemMatch: {academicYear: this.academicYear}}}, {$push: {messages: {subject: "Lost Book Notification", message}}});
         }
     }
     next();

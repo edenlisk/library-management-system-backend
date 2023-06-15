@@ -8,7 +8,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-const { overDueRentalsCronJob, inactiveRentalsCronJob } = require('./utils/cron');
+const { overDueRentalsCronJob, inactiveRentalsCronJob, notifyStudents } = require('./utils/cron');
 
 const rateLimit = require('express-rate-limit');
 const AppError = require('./utils/appError');
@@ -46,6 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 overDueRentalsCronJob();
 inactiveRentalsCronJob();
+notifyStudents()
 
 
 const limiter = rateLimit(

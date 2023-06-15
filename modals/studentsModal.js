@@ -89,6 +89,15 @@ const studentSchema = new mongoose.Schema(
             minLength: 5,
             select: false,
             required: [true, "Please provide password"]
+        },
+        messages: {
+            type: [
+                {
+                    subject: String,
+                    message: String
+                }
+            ],
+            default: () => []
         }
     },
     {

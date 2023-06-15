@@ -39,7 +39,7 @@ exports.getAllStudents = catchAsync(async (req, res, next) => {
 
 exports.getStudent = catchAsync(async (req, res, next) => {
     const student = await Student.findOne({_id: req.params.studentId}).select({rentals: 0});
-    if (!student) return next(new AppError("Student no longer exists!", 400));
+    if (!student) return next(new AppError("Student no longer exists!", 401));
     res
         .status(200)
         .json(
