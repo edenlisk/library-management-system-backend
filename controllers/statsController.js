@@ -389,39 +389,6 @@ exports.topStudents = catchAsync(async (req, res, next) => {
             }
         }
     }
-    // let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}})
-    //         .populate(
-    //             {
-    //                 path: 'rentals',
-    //                 populate: {
-    //                     path: 'rentalHistory',
-    //                     model: 'Rental'
-    //                 }
-    //             }
-    //         )
-    // ;
-    // const result = [];
-    // students = students.slice(0, 9);
-    // students.forEach(student => {
-    //     student.rentals.forEach((rent, index) => {
-    //         if (rent.academicYear === req.params.academicYear) {
-    //             const { _id, name, registrationNumber, fine } = student;
-    //             const stu = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
-    //             result.push(stu);
-    //         }else {
-    //             student.rentals.splice(index, 1);
-    //         }
-    //     })
-    // })
-    // result.sort((a, b) => {
-    //     if (a.numberOfRentals > b.numberOfRentals) {
-    //         return -1
-    //     } else if (a.numberOfRentals < b.numberOfRentals) {
-    //         return 1
-    //     } else {
-    //         return 0
-    //     }
-    // })
     res
         .status(200)
         .json(
