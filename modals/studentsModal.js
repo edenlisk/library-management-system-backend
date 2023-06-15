@@ -97,6 +97,9 @@ const studentSchema = new mongoose.Schema(
                     message: String
                 }
             ],
+            default: () => {
+                return [];
+            }
         }
     },
     {

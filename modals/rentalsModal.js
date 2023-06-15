@@ -91,8 +91,8 @@ rentalSchema.pre('save', async function(next) {
             You have successfully extended due date for the book with the following details: \n
             BookId: ${this.bookId} \n
             Book name: ${this.nameOfBook} \n
-            Issue date: ${this.issueDate} \n
-            Due date: ${this.dueDate} \n
+            Issue date: ${this.issueDate.toISOString().split('T')[0]} \n
+            Due date: ${this.dueDate.toISOString().split('T')[0]} \n
             Book category: ${this.categoryName} \n
             Language: ${this.language}  \n \n
             done at: ${new Date().toLocaleDateString()}.
@@ -111,9 +111,9 @@ rentalSchema.pre('save', async function(next) {
                 You have successfully returned the book with the following details: \n
                 BookId: ${this.bookId} \n
                 Book name: ${this.nameOfBook} \n
-                Issue date: ${this.issueDate} \n
-                Due date: ${this.dueDate} \n
-                Return date: ${this.returnDate} \n
+                Issue date: ${this.issueDate.toISOString().split('T')[0]} \n
+                Due date: ${this.dueDate.toISOString().split('T')[0]} \n
+                Return date: ${this.returnDate.toISOString().split('T')[0]} \n
                 Book category: ${this.categoryName} \n
                 Language: ${this.language} \n \n
                 done at: ${new Date().toLocaleDateString()}.
@@ -133,7 +133,7 @@ rentalSchema.pre('save', async function(next) {
                 ⚠ The book with the following details is marked as lost: \n
                 BookId: ${this.bookId} \n
                 Book name: ${this.nameOfBook} \n
-                Issue date: ${this.issueDate} \n
+                Issue date: ${this.issueDate.toISOString().split('T')[0]} \n
                 Book category: ${this.categoryName} \n
                 Academic Level: ${this.academicLevel} \n
                 Language: ${this.language} \n \n \n \n
