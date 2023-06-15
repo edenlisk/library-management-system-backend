@@ -355,39 +355,73 @@ exports.numberOfRentalsByCategory = catchAsync(async (req, res, next) => {
 })
 
 exports.topStudents = catchAsync(async (req, res, next) => {
-    let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}})
-            .populate(
-                {
-                    path: 'rentals',
-                    populate: {
-                        path: 'rentalHistory',
-                        model: 'Rental'
-                    }
+    const topStudents = await Rental.aggregate(
+        [
+            {
+                $match: {academicYear: req.params.academicYear}
+            },
+            {
+                $group: {
+                    _id: '$studentId',
+                    numberOfRentals: {$sum: 1}
                 }
-            )
-    ;
-    const result = [];
-    students = students.slice(0, 9);
-    students.forEach(student => {
-        student.rentals.forEach((rent, index) => {
-            if (rent.academicYear === req.params.academicYear) {
-                const { _id, name, registrationNumber, fine } = student;
-                const stu = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
-                result.push(stu);
-            }else {
-                student.rentals.splice(index, 1);
+            },
+            {
+                $sort: {
+                    numberOfRentals: -1
+                }
+            },
+            {
+                $limit: 10
             }
-        })
-    })
-    result.sort((a, b) => {
-        if (a.numberOfRentals > b.numberOfRentals) {
-            return -1
-        } else if (a.numberOfRentals < b.numberOfRentals) {
-            return 1
-        } else {
-            return 0
+        ]
+    );
+    const result = [];
+    if (topStudents) {
+        for (const student of topStudents) {
+            const targetStudent = await Student.findOne({_id: student._id});
+            if (!targetStudent) {
+                const index = topStudents.indexOf(student);
+                topStudents.splice(index, 1);
+            } else {
+                const { name, registrationNumber, _id, fine } = targetStudent;
+                result.push({name, registrationNumber, numberOfRentals: student.numberOfRentals, _id, fine})
+            }
         }
-    })
+    }
+    // let students = await Student.find({rentals: {$elemMatch: {academicYear: req.params.academicYear}}})
+    //         .populate(
+    //             {
+    //                 path: 'rentals',
+    //                 populate: {
+    //                     path: 'rentalHistory',
+    //                     model: 'Rental'
+    //                 }
+    //             }
+    //         )
+    // ;
+    // const result = [];
+    // students = students.slice(0, 9);
+    // students.forEach(student => {
+    //     student.rentals.forEach((rent, index) => {
+    //         if (rent.academicYear === req.params.academicYear) {
+    //             const { _id, name, registrationNumber, fine } = student;
+    //             const stu = {_id, name, registrationNumber, fine, numberOfRentals: rent.rentalHistory.length};
+    //             result.push(stu);
+    //         }else {
+    //             student.rentals.splice(index, 1);
+    //         }
+    //     })
+    // })
+    // result.sort((a, b) => {
+    //     if (a.numberOfRentals > b.numberOfRentals) {
+    //         return -1
+    //     } else if (a.numberOfRentals < b.numberOfRentals) {
+    //         return 1
+    //     } else {
+    //         return 0
+    //     }
+    // })
     res
         .status(200)
         .json(
