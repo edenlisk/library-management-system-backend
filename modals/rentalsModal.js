@@ -87,14 +87,13 @@ rentalSchema.pre('save', async function(next) {
     }
 
     if (this.isModified('dueDate') && !this.isNew) {
-        const message = `
-            You have successfully extended due date for the book with the following details: \n
-            BookId: ${this.bookId} \n
-            Book name: ${this.nameOfBook} \n
-            Issue date: ${this.issueDate.toISOString().split('T')[0]} \n
-            Due date: ${this.dueDate.toISOString().split('T')[0]} \n
-            Book category: ${this.categoryName} \n
-            Language: ${this.language}  \n \n
+        const message = `You have successfully extended due date for the book with the following details:
+            BookId: ${this.bookId}
+            Book name: ${this.nameOfBook}
+            Issue date: ${this.issueDate.toISOString().split('T')[0]}
+            Due date: ${this.dueDate.toISOString().split('T')[0]}
+            Book category: ${this.categoryName}
+            Language: ${this.language}  \n
             done at: ${new Date().toLocaleDateString()}.
         `;
         await studentsModal.findByIdAndUpdate(this.studentId, {$push: {messages: {subject: "Extended rental due date", message}}});
@@ -107,15 +106,14 @@ rentalSchema.pre('save', async function(next) {
                 {$inc: {availableCopy: 1}},
                 {new: true}
             )
-            const message = `
-                You have successfully returned the book with the following details: \n
-                BookId: ${this.bookId} \n
-                Book name: ${this.nameOfBook} \n
-                Issue date: ${this.issueDate.toISOString().split('T')[0]} \n
-                Due date: ${this.dueDate.toISOString().split('T')[0]} \n
-                Return date: ${this.returnDate.toISOString().split('T')[0]} \n
-                Book category: ${this.categoryName} \n
-                Language: ${this.language} \n \n
+            const message = `You have successfully returned the book with the following details:
+                BookId: ${this.bookId}
+                Book name: ${this.nameOfBook}
+                Issue date: ${this.issueDate.toISOString().split('T')[0]}
+                Due date: ${this.dueDate.toISOString().split('T')[0]}
+                Return date: ${this.returnDate.toISOString().split('T')[0]}
+                Book category: ${this.categoryName}
+                Language: ${this.language} \n
                 done at: ${new Date().toLocaleDateString()}.
             `;
             await studentsModal.findByIdAndUpdate(this.studentId, {$push: {messages: {subject: "Returned Rental notification", message}}});
@@ -129,16 +127,15 @@ rentalSchema.pre('save', async function(next) {
             const today = new Date();
             today.setDate(today.getDate() + settings.inactivityDays);
             this.nextActiveDate = new Date(today).toISOString().split('T')[0];
-            const message = `
-                ⚠ The book with the following details is marked as lost: \n
-                BookId: ${this.bookId} \n
-                Book name: ${this.nameOfBook} \n
-                Issue date: ${this.issueDate.toISOString().split('T')[0]} \n
-                Book category: ${this.categoryName} \n
-                Academic Level: ${this.academicLevel} \n
-                Language: ${this.language} \n \n \n \n
-                Please if you have this book or any useful information, kindly consider reaching out librarian. \n
-                Thank you in advance \n \n
+            const message = `⚠ The book with the following details is marked as lost:
+                BookId: ${this.bookId}
+                Book name: ${this.nameOfBook}
+                Issue date: ${this.issueDate.toISOString().split('T')[0]}
+                Book category: ${this.categoryName}
+                Academic Level: ${this.academicLevel}
+                Language: ${this.language} \n \n \n
+                Please if you have this book or any useful information, kindly consider reaching out the librarian to fix the issue. \n
+                Thank you in advance \n 
                 done at: ${new Date().toLocaleDateString()}.
             `;
             await studentsModal.updateMany({classIds: {$elemMatch: {academicYear: this.academicYear}}}, {$push: {messages: {subject: "Lost Book Notification", message}}});
