@@ -46,7 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 overDueRentalsCronJob();
 inactiveRentalsCronJob();
-notifyStudents()
+notifyStudents();
 
 
 const limiter = rateLimit(

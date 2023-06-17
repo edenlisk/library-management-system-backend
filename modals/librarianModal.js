@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { capitalizeSentence } = require("../utils/helpFunctions");
 
 const librarianSchema = new mongoose.Schema(
     {
@@ -95,7 +96,9 @@ const librarianSchema = new mongoose.Schema(
 
 librarianSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
-
+    if (this.isModified('name')) {
+        this.name = capitalizeSentence(this.name);
+    }
     this.password = await bcrypt.hash(this.password, 12);
     this.passwordConfirm = undefined;
     next();

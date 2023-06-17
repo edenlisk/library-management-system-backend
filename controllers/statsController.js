@@ -679,6 +679,7 @@ exports.weeklyStats = catchAsync(async (req, res, next) => {
                 }
             }
         )
+    ;
 
 })
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Book = require('../modals/bookModel');
+const { capitalizeSentence } = require("../utils/helpFunctions");
 
 const teacherSchema = new mongoose.Schema(
     {
@@ -39,6 +40,13 @@ const teacherSchema = new mongoose.Schema(
         indexes: [{ unique: true, fields: ['registrationNumber'] }],
     }
 )
+
+teacherSchema.pre('save', async function (next) {
+    if (this.isModified('name')) {
+        this.name = capitalizeSentence(this.name);
+    }
+    next()
+})
 
 teacherSchema.pre('deleteOne', async function(next) {
     try {

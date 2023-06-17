@@ -4,6 +4,7 @@ const Student = require('../modals/studentsModal');
 const Class = require('../modals/classModal');
 const csvtojson = require('csvtojson');
 const APIFeatures = require('../utils/apiFeatures');
+const { capitalizeSentence } = require('../utils/helpFunctions');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -256,7 +257,7 @@ exports.importStudents = catchAsync(async (req, res, next) => {
                 } else {
                     await Student.create(
                         {
-                            name: student.name,
+                            name: capitalizeSentence(student.name),
                             registrationNumber: student.registrationNumber,
                             password: student.registrationNumber,
                             academicYear: targetClass.academicYear,

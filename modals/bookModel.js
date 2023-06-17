@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Category = require('../modals/categoryModel');
+const { capitalizeSentence } = require('../utils/helpFunctions');
 const AppError = require('../utils/appError');
 
 
@@ -90,6 +91,7 @@ bookSchema.pre('save', async function (next) {
             this.availableCopy -= parseInt(numberOfBooks) - parseInt(this.numberOfBooks);
         }
     }
+    this.bookName = capitalizeSentence(this.bookName);
     this.bookName = this.bookName.trim();
     this.categoryName = this.categoryName.trim();
     next();
