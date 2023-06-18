@@ -910,4 +910,80 @@ exports.allRentals = catchAsync(async (req, res, next) => {
     ;
 })
 
+exports.numberOfRentalsBySubcategory = catchAsync(async (req, res, next) => {
+    let result = await Book.aggregate([
+        {
+            $match: {categoryName: {$nin: ["novel", "religion and ethics", "music", "general sciences", "ict", "creative art", "literature in english"]}}
+        },
+        {
+            $group: {
+                _id: {
+                    categoryName: "$categoryName",
+                    academicLevel: "$academicLevel"
+                },
+                rentalsCount: { $sum: "$numberOfRentals" }
+            }
+        },
+        {
+            $group: {
+                _id: "$_id.categoryName",
+                rentalsByAcademicLevel: {
+                    $push: {
+                        academicLevel: "$_id.academicLevel",
+                        rentalsCount: "$rentalsCount"
+                    }
+                }
+            }
+        }
+    ]);
 
+    const processing = (item) => {
+        const obj = {};
+        item.rentalsByAcademicLevel.map(elem => {
+            const value = Object.values(elem)[0].split(' ').join('');
+            obj[value] = elem.rentalsCount;
+        })
+        return obj;
+    }
+
+    if (result) {
+        const categoryMapping = {
+            entrepreneurship: "ENT",
+            mathematics: "MATH",
+            physics: "PHY",
+            economics: "ECON",
+            kinyarwanda: "KINY",
+            english: "ENG",
+            french: "FRE",
+            chemistry: "CHEM",
+            biology: "BIO",
+            geography: "GEO",
+            novel: "NOV",
+            history: "HIST",
+            "computer science": "COMP",
+            "literature in english": "LIT",
+            "religion and ethics": "REL",
+            "creative art": 'CRE',
+            music: "MUSIC",
+            "general sciences": "GSCS",
+            kiswahili: "KISW",
+            ict: "ICT"
+        };
+
+        result = result.map(item => {
+            const demo = processing(item);
+            return {categoryName: categoryMapping[item._id], ...demo}
+        })
+    }
+    res
+        .status(200)
+        .json(
+            {
+                status: "Success",
+                data: {
+                    result
+                }
+            }
+        )
+    ;
+})
