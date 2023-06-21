@@ -38,6 +38,7 @@ exports.createTeacher = catchAsync(async (req, res, next) => {
         {
             name: req.body.name,
             registrationNumber: req.body.registrationNumber,
+            password: req.body.registrationNumber,
             rentals: []
         }
     );

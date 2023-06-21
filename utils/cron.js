@@ -1,6 +1,8 @@
 const cron = require('node-cron');
 const Rental = require('../modals/rentalsModal');
 const Student = require('../modals/studentsModal');
+const Teacher = require('../modals/teachersModal')
+const teacherRental = require('../modals/teachersRentalModal');
 const Settings = require('../modals/settingsModel');
 
 exports.overDueRentalsCronJob = () => {
@@ -87,6 +89,7 @@ exports.notifyStudents = () => {
             tomorrow.setDate(tomorrow.getDate() + 1);
             tomorrow = tomorrow.toISOString().split('T')[0];
             const rentals = await Rental.find({returned: false, active: true, dueDate: {$eq: new Date(tomorrow)}});
+
             if (rentals) {
                 for (const rental of rentals) {
                     const {nameOfBook, studentId, dueDate, bookId, categoryName} = rental;
@@ -95,11 +98,49 @@ exports.notifyStudents = () => {
                         BookId: ${bookId}
                         Book name: ${nameOfBook}
                         Due date: ${dueDate.toISOString().split('T')[0]}
-                        Book category: ${categoryName} \n \n \n
+                        Book category: ${categoryName}
                         Enjoy your day !.
                         done at: ${new Date().toLocaleDateString()}.
                     `;
                     await Student.findByIdAndUpdate(studentId, {
+                        $push: {
+                            messages: {
+                                subject: "Overdue Rental Reminder",
+                                message
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            console.log(e);
+            console.log('Something went wrong with cron job for notifying students about overdue rentals');
+        }
+    }, {timezone: "Africa/Kigali", scheduled: true});
+    task.start();
+}
+
+exports.notifyTeachers = () => {
+    const task = cron.schedule('0 0 * * *', async () => {
+        try {
+            const today = new Date();
+            let tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow = tomorrow.toISOString().split('T')[0];
+            const rentals = await teacherRental.find({returned: false, active: true, dueDate: {$eq: new Date(tomorrow)}});
+            if (rentals) {
+                for (const rental of rentals) {
+                    const {nameOfBook, teacherId, dueDate, bookId, categoryName} = rental;
+                    const message = `
+                        ⚠ Reminder: Please remember to return the book with following details to avoid fines,
+                        BookId: ${bookId}
+                        Book name: ${nameOfBook}
+                        Due date: ${dueDate.toISOString().split('T')[0]}
+                        Book category: ${categoryName}
+                        Enjoy your day !.
+                        done at: ${new Date().toLocaleDateString()}.
+                    `;
+                    await Student.findByIdAndUpdate(teacherId, {
                         $push: {
                             messages: {
                                 subject: "Overdue Rental Reminder",

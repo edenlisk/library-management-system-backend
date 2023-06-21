@@ -63,6 +63,7 @@ const teachersRentalSchema = new mongoose.Schema(
 )
 
 teachersRentalSchema.pre('save', async function (next) {
+    const Teacher = require('../modals/teachersModal');
     if (this.isNew) {
         const Teacher = require('../modals/teachersModal');
         const teacher = await Teacher.findOne({_id: this.teacherId})
@@ -84,6 +85,18 @@ teachersRentalSchema.pre('save', async function (next) {
             )
             this.active = null;
         }
+    }
+    if (this.isModified('dueDate') && !this.isNew) {
+        const message = `You have successfully extended due date for the book with the following details:
+            BookId: ${this.bookId}
+            Book name: ${this.nameOfBook}
+            Issue date: ${this.issueDate.toISOString().split('T')[0]}
+            Due date: ${this.dueDate.toISOString().split('T')[0]}
+            Book category: ${this.categoryName}
+            Language: ${this.language}  \n
+            done at: ${new Date().toLocaleDateString()}.
+        `;
+        await Teacher.findByIdAndUpdate(this.teacherId, {$push: {messages: {subject: "Extended rental due date", message}}});
     }
     next();
 });

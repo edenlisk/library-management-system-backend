@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Book = require('../modals/bookModel');
+const bcrypt = require('bcryptjs');
 const { capitalizeSentence } = require("../utils/helpFunctions");
 
 const teacherSchema = new mongoose.Schema(
@@ -26,6 +27,23 @@ const teacherSchema = new mongoose.Schema(
                 message: "Invalid registration number, it can't contain spaces and special characters"
             }
         },
+        messages: {
+            type: [
+                {
+                    subject: String,
+                    message: String
+                }
+            ],
+            default: () => {
+                return [];
+            }
+        },
+        password: {
+          type: String,
+          minLength: 5,
+          select: false,
+          required: [true, "Please provide password"]
+        },
         rentals: {
             type: [
                 {
@@ -40,6 +58,13 @@ const teacherSchema = new mongoose.Schema(
         indexes: [{ unique: true, fields: ['registrationNumber'] }],
     }
 )
+
+teacherSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 12);
+    }
+    next();
+})
 
 teacherSchema.pre('save', async function (next) {
     if (this.isModified('name')) {
