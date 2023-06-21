@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Book = require('../modals/bookModel');
 const Student = require('../modals/studentsModal');
+const academicYear = require('../modals/academicYear');
 const AppError = require('../utils/appError');
 
 const teachersRentalSchema = new mongoose.Schema(
@@ -123,7 +124,18 @@ teachersRentalSchema.pre('save', async function (next) {
                 Thank you in advance \n 
                 done at: ${new Date().toLocaleDateString()}.
             `;
-            await Student.updateMany({  }, {
+            await Teacher.findByIdAndUpdate(this.teacherId, {
+                $push: {
+                    messages: {
+                        subject: "Lost Book Notification",
+                        message
+                    }
+                }
+            })
+            const schoolYearPrefix = this.issueDate.toISOString().split('T')[0].split('-')[0];
+            const schoolYearSuffix = parseInt(schoolYearPrefix) + 1;
+            const schoolYear = `${schoolYearPrefix}-${schoolYearSuffix}`;
+            await Student.updateMany({classIds: {$elemMatch: {academicYear: schoolYear}}} , {
                 $push: {
                     messages: {
                         subject: "Lost Book Notification",
