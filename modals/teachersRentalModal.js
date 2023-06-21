@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Book = require('../modals/bookModel');
+const Student = require('../modals/studentsModal');
 const AppError = require('../utils/appError');
 
 const teachersRentalSchema = new mongoose.Schema(
@@ -83,6 +84,17 @@ teachersRentalSchema.pre('save', async function (next) {
                 {$inc: {availableCopy: 1}},
                 {new: true}
             )
+            const message = `You have successfully returned the book with the following details:
+                BookId: ${this.bookId}
+                Book name: ${this.nameOfBook}
+                Issue date: ${this.issueDate.toISOString().split('T')[0]}
+                Due date: ${this.dueDate.toISOString().split('T')[0]}
+                Return date: ${this.returnDate.toISOString().split('T')[0]}
+                Book category: ${this.categoryName}
+                Language: ${this.language} \n
+                done at: ${new Date().toLocaleDateString()}.
+            `;
+            await Teacher.findByIdAndUpdate(this.teacherId, {$push: {messages: {subject: "Returned Rental notification", message}}});
             this.active = null;
         }
     }
@@ -98,8 +110,31 @@ teachersRentalSchema.pre('save', async function (next) {
         `;
         await Teacher.findByIdAndUpdate(this.teacherId, {$push: {messages: {subject: "Extended rental due date", message}}});
     }
+    if (this.isModified('active') && !this.isModified('returned') && !this.isNew) {
+        if (this.active === false && this.returned === false) {
+            const message = `⚠ The book with the following details is marked as lost:
+                BookId: ${this.bookId}
+                Book name: ${this.nameOfBook}
+                Issue date: ${this.issueDate.toISOString().split('T')[0]}
+                Book category: ${this.categoryName}
+                Academic Level: ${this.academicLevel}
+                Language: ${this.language} \n \n \n
+                Please if you have this book or any useful information, kindly consider reaching out the librarian to fix the issue. \n
+                Thank you in advance \n 
+                done at: ${new Date().toLocaleDateString()}.
+            `;
+            await Student.updateMany({  }, {
+                $push: {
+                    messages: {
+                        subject: "Lost Book Notification",
+                        message
+                    }
+                }
+            });
+        }
+    }
     next();
-});
+})
 
 teachersRentalSchema.pre('deleteOne', async function(next) {
     const Teacher = require('../modals/teachersModal');

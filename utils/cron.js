@@ -140,7 +140,7 @@ exports.notifyTeachers = () => {
                         Enjoy your day !.
                         done at: ${new Date().toLocaleDateString()}.
                     `;
-                    await Student.findByIdAndUpdate(teacherId, {
+                    await Teacher.findByIdAndUpdate(teacherId, {
                         $push: {
                             messages: {
                                 subject: "Overdue Rental Reminder",
