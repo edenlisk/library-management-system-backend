@@ -203,7 +203,7 @@ exports.teacherLogin = catchAsync(async (req, res, next) => {
     const { registrationNumber, password } = req.body;
 
     if (!registrationNumber || !password) return next(new AppError("Please provide registration number and password", 401));
-    const teacher = await Student.findOne({registrationNumber: registrationNumber.trim()}).select("+password");
+    const teacher = await Teacher.findOne({registrationNumber: registrationNumber.trim()}).select("+password");
     if (!teacher || !(await teacher.verifyPassword(password))) {
         return next(new AppError("Invalid registration number or Password"), 401);
     }
