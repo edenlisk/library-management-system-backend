@@ -6,6 +6,13 @@ const Book = require('../modals/bookModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
+const messageSchema = new mongoose.Schema(
+    {
+        subject: String,
+        message: String
+    }, {timestamps: true}
+)
+
 const studentSchema = new mongoose.Schema(
     {
         name: {
@@ -91,12 +98,7 @@ const studentSchema = new mongoose.Schema(
             required: [true, "Please provide password"]
         },
         messages: {
-            type: [
-                {
-                    subject: String,
-                    message: String
-                }
-            ],
+            type: [messageSchema],
             default: () => {
                 return [];
             }

@@ -42,6 +42,7 @@ exports.createTeacher = catchAsync(async (req, res, next) => {
             rentals: []
         }
     );
+    newTeacher.password = undefined;
     res
         .status(201)
         .json(
@@ -87,9 +88,10 @@ exports.getTeacherRentals = catchAsync(async (req, res, next) => {
 })
 
 exports.updateTeacher = catchAsync(async (req, res, next) => {
-    const updatedTeacher = await Teacher.findById(req.params.teacherId);
+    const updatedTeacher = await Teacher.findById(req.params.teacherId).select('+password');
     if (!updatedTeacher) return next(new AppError("Teacher no longer exists!", 400));
     if (req.body.name) updatedTeacher.name = req.body.name;
+    if (req.password) updatedTeacher.password = req.body.password;
     await updatedTeacher.save({validateModifiedOnly: true});
     res
         .status(200)

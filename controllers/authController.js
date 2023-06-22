@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { promisify } = require('util');
 const LibrarianModal = require('../modals/librarianModal');
+const Teacher = require('../modals/teachersModal');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -194,5 +195,18 @@ exports.studentLogin = catchAsync(async (req, res, next) => {
     if (!student || !(await student.verifyPassword(password))) {
         return next(new AppError("Invalid registration number or Password"), 401);
     }
+    student.password = undefined;
     createSendToken(student, 200, res);
+})
+
+exports.teacherLogin = catchAsync(async (req, res, next) => {
+    const { registrationNumber, password } = req.body;
+
+    if (!registrationNumber || !password) return next(new AppError("Please provide registration number and password", 401));
+    const teacher = await Student.findOne({registrationNumber: registrationNumber.trim()}).select("+password");
+    if (!teacher || !(await teacher.verifyPassword(password))) {
+        return next(new AppError("Invalid registration number or Password"), 401);
+    }
+    teacher.password = undefined;
+    createSendToken(teacher, 200, res);
 })

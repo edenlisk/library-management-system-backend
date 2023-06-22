@@ -9,12 +9,15 @@ const {
     getTeacher } = require('../controllers/teachersController');
 
 // TODO: PROTECT ALL ROUTES
-const { restrictTo, protect } = require('../controllers/authController');
+const { restrictTo, protect, teacherLogin } = require('../controllers/authController');
 
 
 router.route('/')
     .get(getAllTeachers)
     .post(createTeacher)
+
+router.route('/login')
+    .post(teacherLogin)
 
 router.route('/teachers-rentals/:teacherId')
     .get(getTeacherRentals)

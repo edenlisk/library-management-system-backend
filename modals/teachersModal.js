@@ -73,6 +73,10 @@ teacherSchema.pre('save', async function (next) {
     next()
 })
 
+teacherSchema.methods.verifyPassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+}
+
 teacherSchema.pre('deleteOne', async function(next) {
     try {
         const TeachersRentalModal = require('../modals/teachersRentalModal');
