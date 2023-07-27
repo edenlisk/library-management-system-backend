@@ -190,6 +190,11 @@ exports.numberOfRentalsByCategory = catchAsync(async (req, res, next) => {
                     _id: 0,
                 },
             },
+            {
+                $sort: {
+                    categoryName: 1
+                }
+            }
         ]
     )
     const templateObj = {

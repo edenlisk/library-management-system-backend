@@ -83,6 +83,7 @@ exports.logout = catchAsync(async (req, res, next) => {
                 message: "Logged out"
             }
         )
+    ;
 })
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -94,7 +95,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
     // VERIFICATION OF TOKEN
     if (!token) {
-        return next(new AppError("You're not logged in, Please login"), 401);
+        return next(new AppError("You're not logged in, Please login", 401));
     }
     // CHECK IF USER STILL EXISTS
     const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET_KEY);
