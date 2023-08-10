@@ -149,7 +149,7 @@ rentalSchema.pre('deleteOne', async function(next) {
     const { _conditions } = this;
     const rental = await rentalModal.findOne({_id: _conditions._id});
     const studentId = rental.studentId;
-    if (!studentId) return next(new AppError("Rental does not exits!", 400));
+    if (!studentId) return next(new AppError("Rental does not exists!", 400));
     if (rental.returned === false) return next(new AppError("Rental cannot be deleted while not returned", 400));
     await studentsModal.updateOne(
         { _id: studentId, rentals: {$elemMatch: {academicYear: rental.academicYear}} },
