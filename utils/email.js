@@ -11,7 +11,6 @@ module.exports = class Email {
         this.url = url;
     }
 
-
     newTransport() {
         // If in production, create sendgrid transporter
         if (process.env.NODE_ENV === 'production') {
