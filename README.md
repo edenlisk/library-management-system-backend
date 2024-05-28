@@ -18,7 +18,7 @@
 - [📝 License](#license)
 
 
-# 📖 [School Library Management System] <a name="about-project"></a>
+# 📖 School Library Management System <a name="about-project"></a>
 
 
 **[School Library Management System]** Efficiently manage your library with our Library Management System! Streamline book cataloging, track borrowing history, and simplify administrative tasks. Our user-friendly interface makes it easy for both librarians and patrons to navigate, ensuring a seamless and organized library experience. Take control of your library's resources and enhance the borrowing process with our comprehensive and intuitive system.
