@@ -77,6 +77,9 @@ app.use('/api', limiter);
 // app.use('*', cors(corsOptionsDelegate));
 
 /* SETUP ROUTES */
+app.use('/api/v1/keep-awake', (req, res) => {
+    res.status(200).json({message: 'keep awake'})
+})
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/librarians', libraryRouter);
 app.use('/api/v1/students', studentsRouter);
